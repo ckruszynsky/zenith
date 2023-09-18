@@ -1,8 +1,9 @@
 ﻿namespace Zenith.Domain.Entities
 {
     using System.Collections.Generic;
+    using Zenith.SharedKernel;
 
-    public class Tag : BaseEntity
+    public class Tag : EntityBase
     {
         public Tag()
         {

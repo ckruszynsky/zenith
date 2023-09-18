@@ -1,6 +1,8 @@
-﻿namespace Zenith.Domain.Entities
+﻿using Zenith.SharedKernel;
+
+namespace Zenith.Domain.Entities
 {
-    public class ActivityLog : BaseEntity
+    public class ActivityLog : EntityBase
     {
         public string ActivityType { get; set; }
         public TransactionType TransactionType { get; set; }

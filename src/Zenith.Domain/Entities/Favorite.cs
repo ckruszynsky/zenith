@@ -1,6 +1,8 @@
-﻿namespace Zenith.Domain.Entities
+﻿using Zenith.SharedKernel;
+
+namespace Zenith.Domain.Entities
 {
-    public class Favorite : BaseEntity
+    public class Favorite : EntityBase
     {
         public string UserId { get; set; }
 

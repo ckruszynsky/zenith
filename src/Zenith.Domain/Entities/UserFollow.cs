@@ -1,6 +1,8 @@
-﻿namespace Zenith.Domain.Entities
+﻿using Zenith.SharedKernel;
+
+namespace Zenith.Domain.Entities
 {
-    public class UserFollow : BaseEntity
+    public class UserFollow : EntityBase
     {
         public string UserFollowerId { get; set; }
 

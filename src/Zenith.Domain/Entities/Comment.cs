@@ -1,6 +1,8 @@
-﻿namespace Zenith.Domain.Entities
+﻿using Zenith.SharedKernel;
+
+namespace Zenith.Domain.Entities
 {
-    public class Comment : BaseEntity
+    public class Comment : EntityBase
     {
         public string Body { get; set; }
 
