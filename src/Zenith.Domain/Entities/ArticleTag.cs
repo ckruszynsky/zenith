@@ -1,6 +1,8 @@
-﻿namespace Zenith.Domain.Entities
+﻿using Zenith.SharedKernel;
+
+namespace Zenith.Domain.Entities
 {
-    public class ArticleTag : BaseEntity
+    public class ArticleTag : EntityBase
     {
         public int ArticleId { get; set; }
         public virtual Article Article { get; set; }
