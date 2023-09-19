@@ -25,16 +25,5 @@ namespace Zenith.Persistence
             base.OnModelCreating(builder);
         }
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            int result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return result;
-        }
-
-        public override int SaveChanges()
-        {
-            return SaveChangesAsync().GetAwaiter().GetResult();
-        }
-
     }
 }
