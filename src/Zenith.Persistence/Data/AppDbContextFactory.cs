@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Zenith.Infrastructure.Data;
 using Zenith.Persistence.Infrastructure;
 
 namespace Zenith.Persistence

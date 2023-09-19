@@ -10,8 +10,4 @@
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="7.0.11" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Zenith.SharedKernel\Zenith.SharedKernel.csproj" />
-  </ItemGroup>
-
 </Project>

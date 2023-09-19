@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Zenith.Domain.Entities;
-using Zenith.SharedKernel;
 
-namespace Zenith.Infrastructure.Data
+namespace Zenith.Persistence
 {
     public class AppDbContext : IdentityDbContext<ZenithUser>
     {
-        private readonly IDomainEventDispatcher? _dispatcher;
 
-        public AppDbContext(DbContextOptions<AppDbContext> options, IDomainEventDispatcher? dispatcher = null) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            _dispatcher = dispatcher;
         }
 
         public DbSet<ActivityLog> ActivityLogs { get; set; }
@@ -31,18 +28,6 @@ namespace Zenith.Infrastructure.Data
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             int result = await base.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            if (_dispatcher == null)
-            {
-                return result;
-            }
-
-            var entitiesWithEvents = ChangeTracker.Entries<EntityBase>()
-                .Select(e => e.Entity)
-                .Where(e => e.DomainEvents.Any())
-                .ToArray();
-
-            await _dispatcher.DispatchAndClearEvents(entitiesWithEvents);
-
             return result;
         }
 
