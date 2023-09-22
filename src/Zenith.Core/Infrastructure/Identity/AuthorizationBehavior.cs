@@ -1,35 +1,39 @@
 ﻿using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using System.Reflection;
 using Zenith.Common.Exceptions;
-using Zenith.Common.Identity;
+using Zenith.Core.Domain.Entities;
 
-namespace Zenith.Common.Behaviors
+namespace Zenith.Core.Infrastructure.Identity
 {
     public class AuthorizationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
     {
-        private readonly ICurrentUserService _currentUserService;
-        private readonly IIdentityService _identityService;
+        private readonly ICurrentUserContext _currentUserContext;
+        private readonly UserManager<ZenithUser> _userManager;
+        private readonly IUserClaimsPrincipalFactory<ZenithUser> _userClaimsPrincipalFactory;
+        private readonly IAuthorizationService _authorizationService;
 
-        public AuthorizationBehavior(ICurrentUserService currentUserService, IIdentityService identityService)
+        public AuthorizationBehavior(ICurrentUserContext currentUserContext,
+            UserManager<ZenithUser> userManager,
+            IUserClaimsPrincipalFactory<ZenithUser> userClaimsPrincipalFactory,
+            IAuthorizationService authorizationService)
         {
-            _currentUserService = currentUserService;
-            _identityService = identityService;
+            _currentUserContext = currentUserContext;
+            _userManager = userManager;
+            _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
+            _authorizationService = authorizationService;
         }
 
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             var authorizeAttributes = request.GetType().GetCustomAttributes<AuthorizeAttribute>();
+            var currentUser = await _currentUserContext.GetCurrentUserContext();
             var authorized = false;
             if (authorizeAttributes.Any())
             {
                 //must be authenticated
-                if (_currentUserService.UserId == null)
+                if (currentUser.Id == null)
                 {
                     throw new UnauthorizedAccessException();
                 }
@@ -37,12 +41,12 @@ namespace Zenith.Common.Behaviors
                 var authorizationWithRoles = authorizeAttributes.Where(a => !string.IsNullOrWhiteSpace(a.Roles));
                 if (authorizationWithRoles.Any())
                 {
+                    var claims = await _userManager.GetClaimsAsync(currentUser);
                     foreach (var roles in authorizationWithRoles.Select(a => a.Roles.Split(',')))
                     {
                         foreach (var role in roles)
                         {
-                            var isInRole = await _identityService.IsUserInRole(_currentUserService.UserId, role.Trim());
-                            if (isInRole)
+                            if (claims.Any(x => x.Type.ToLower() == "role" && x.Value == role))
                             {
                                 authorized = true;
                                 break;
@@ -58,7 +62,8 @@ namespace Zenith.Common.Behaviors
                     {
                         if (policy != null)
                         {
-                            authorized = await _identityService.Authorize(_currentUserService.UserId, policy);
+                            var principal = await _userClaimsPrincipalFactory.CreateAsync(currentUser);
+                            var authorizationResult = await _authorizationService.AuthorizeAsync(principal, policy);
                             if (!authorized)
                             {
                                 throw new ForbiddenAccessException();

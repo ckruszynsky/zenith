@@ -1,13 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zenith.Common.Date
+﻿namespace Zenith.Common.Date
 {
     public interface IDateTime
     {
-        System.DateTime Now { get; }
+        /// <summary>
+        /// Gets the current date and time.
+        /// </summary>
+        DateTime Now { get; }
+
+        /// <summary>
+        /// Gets the current date time year.
+        /// </summary>
+        int CurrentYear { get; }
+
+        /// <summary>
+        /// Gets the current date time month.
+        /// </summary>
+        int CurrentMonth { get; }
+
+        /// <summary>
+        /// Gets the current date time year.
+        /// </summary>
+        int CurrentDay { get; }
     }
 }

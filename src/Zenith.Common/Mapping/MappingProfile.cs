@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using AutoMapper;
+﻿using AutoMapper;
+using System.Reflection;
 
 namespace Zenith.Common.Mapping
 {
@@ -8,6 +8,11 @@ namespace Zenith.Common.Mapping
         public MappingProfile()
         {
             ApplyMappingsFromAssembly(Assembly.GetExecutingAssembly());
+        }
+
+        public MappingProfile(Assembly assembly)
+        {
+            ApplyMappingsFromAssembly(assembly);
         }
 
         private void ApplyMappingsFromAssembly(Assembly assembly)

@@ -1,6 +1,8 @@
 ﻿using Ardalis.Result;
 using AutoMapper;
 using MediatR;
+using Zenith.Common.Mapping;
+using Zenith.Core.Domain.Entities;
 using Zenith.Core.ServiceManger;
 
 namespace Zenith.Core.Features.Articles
@@ -11,7 +13,7 @@ namespace Zenith.Core.Features.Articles
             int PageNumber = 0,
             int PageSize = 10) : IRequest<Result<IEnumerable<ArticleFeedItem>>>;
 
-        public class ArticleFeedItem
+        public class ArticleFeedItem : IMapFrom<Article>
         {
             public string Slug { get; set; }
             public string Title { get; set; }
@@ -22,6 +24,12 @@ namespace Zenith.Core.Features.Articles
             public DateTime Created { get; set; }
             public DateTime Updated { get; set; }
 
+            private void Mapping(Profile profile)
+            {
+                profile
+                .CreateMap<Article, GetArticlesFeed.ArticleFeedItem>()
+               .ForMember(a => a.Author, opts => opts.MapFrom(a => a.Author.NormalizedUserName));
+            }
         }
 
         public class Handler : IRequestHandler<Query, Result<IEnumerable<ArticleFeedItem>>>

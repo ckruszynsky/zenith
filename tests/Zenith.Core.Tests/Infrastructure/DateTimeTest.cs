@@ -1,10 +1,10 @@
 ﻿using Zenith.Common.Date;
 
-namespace Zenith.Core.Infrastructure.Services
+namespace Zenith.Core.Tests.Infrastructure
 {
-    public class MachineDateTime : IDateTime
+    public class DateTimeTest : IDateTime
     {
-        public DateTime Now => DateTime.UtcNow;
+        public DateTime Now => DateTime.Now;
 
         public int CurrentYear => DateTime.Now.Year;
 

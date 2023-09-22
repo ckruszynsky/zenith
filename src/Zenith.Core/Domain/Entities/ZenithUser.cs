@@ -12,11 +12,9 @@ namespace Zenith.Core.Domain.Entities
             Articles = new List<Article>();
         }
 
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Bio { get; set; }
+        public string? Bio { get; set; }
 
-        public string Image { get; set; }
+        public string? Image { get; set; }
 
         public ICollection<UserFollow> Followers { get; }
 

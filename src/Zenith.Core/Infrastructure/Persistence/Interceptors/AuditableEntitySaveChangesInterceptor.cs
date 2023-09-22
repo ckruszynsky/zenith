@@ -1,23 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zenith.Common.Date;
-using Zenith.Common.Identity;
+using Zenith.Core.Infrastructure.Identity;
 
 namespace Zenith.Core.Infrastructure.Persistence.Interceptors
 {
     public class AuditableEntitySaveChangesInterceptor : SaveChangesInterceptor
     {
-        private readonly ICurrentUserService _currentUserService;
+        private readonly ICurrentUserContext _currentUserService;
         private readonly IDateTime _dateTime;
 
         public AuditableEntitySaveChangesInterceptor(
-            ICurrentUserService currentUserService,
+            ICurrentUserContext currentUserService,
             IDateTime dateTime)
         {
             _currentUserService = currentUserService;
@@ -40,6 +35,7 @@ namespace Zenith.Core.Infrastructure.Persistence.Interceptors
 
         public void UpdateEntities(DbContext? context)
         {
+            var currentUser = _currentUserService.GetCurrentUserContext();
             if (context == null) return;
 
             foreach (var entry in context.ChangeTracker.Entries())
@@ -50,13 +46,13 @@ namespace Zenith.Core.Infrastructure.Persistence.Interceptors
 
                     if (entry.State == EntityState.Added)
                     {
-                        entry.Property("CreatedBy").CurrentValue = _currentUserService.UserId;
+                        entry.Property("CreatedBy").CurrentValue = currentUser.Id;
                         entry.Property("Created").CurrentValue = _dateTime.Now;
                     }
 
                     if (entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.HasChangedOwnedEntities())
                     {
-                        entry.Property("LastModifiedBy").CurrentValue = _currentUserService.UserId;
+                        entry.Property("LastModifiedBy").CurrentValue = currentUser.Id;
                         entry.Property("LastModified").CurrentValue = _dateTime.Now;
                     }
 
