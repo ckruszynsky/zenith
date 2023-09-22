@@ -1,5 +1,5 @@
 ﻿using Zenith.Core.Features.Articles;
-using Zenith.Persistence;
+using Zenith.Core.Infrastructure.Persistence;
 
 namespace Zenith.Core.ServiceManger
 {

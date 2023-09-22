@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using Zenith.Domain.Entities;
+using Zenith.Core.Domain.Entities;
+
 
 namespace Zenith.Core.Features.Articles
 {

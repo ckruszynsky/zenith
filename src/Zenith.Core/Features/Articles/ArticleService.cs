@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Zenith.Domain.Entities;
-using Zenith.Persistence;
+using Zenith.Core.Domain.Entities;
+using Zenith.Core.Infrastructure.Persistence;
 
 namespace Zenith.Core.Features.Articles
 {
