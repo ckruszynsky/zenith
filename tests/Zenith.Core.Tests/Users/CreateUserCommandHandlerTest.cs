@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using Zenith.Core.Domain.Entities;
+
 using Zenith.Core.Features.Users;
 using Zenith.Core.Tests.Infrastructure;
 
@@ -37,6 +38,7 @@ namespace Zenith.Core.Tests.Users
             result.Value.Email.ShouldBe(createUserCommand.Email);
             Context.Users.Single(u => u.UserName == createUserCommand.Username).ShouldNotBeNull();
         }
+
 
         [Fact]
         public async Task GivenRequestContainsExistingEmail_WhenUserAlreadyExists_ReturnsError()

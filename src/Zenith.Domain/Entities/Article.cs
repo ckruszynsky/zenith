@@ -14,6 +14,7 @@ public class Article : EntityBase
     public ICollection<Favorite> Favorites { get; set; }
     public ICollection<Comment> Comments { get; set; }
     public int FavoritesCount => Favorites.Count;
+    public int CommentsCount => Comments.Count;
 
     public Article()
     {

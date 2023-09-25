@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Zenith.Persistence.Infrastructure;
+using Zenith.Core.Infrastructure.Persistence.Infrastructure;
 
-namespace Zenith.Persistence
+namespace Zenith.Core.Infrastructure.Persistence
 {
     public class AppDbContextFactory : DesignTimeDbContextFactoryBase<AppDbContext>
     {
