@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Zenith.Core.Domain.Entities;
 using Zenith.Core.Infrastructure.Persistence;
 
 namespace Zenith.Core.Features.Articles
@@ -12,20 +11,30 @@ namespace Zenith.Core.Features.Articles
             _appDbContext = appDbContext;
         }
 
-        public async Task<IEnumerable<Article>> GetArticleFeedAsync(
+        public async Task<PagedArticleDto> GetArticleFeedAsync(
             int pageNumber,
             int pageSize)
         {
-            return await _appDbContext.Articles
-                .Include(a => a.Author)
-                    .ThenInclude(au => au.Followers)
-                .Include(a => a.ArticleTags)
-                    .ThenInclude(at => at.Tag)
-                .Include(a => a.Favorites)
-                .Include(au => au.Comments)
+            var queryable = _appDbContext.Articles
+                            .Include(a => a.Author)
+                                .ThenInclude(au => au.Followers)
+                            .Include(a => a.ArticleTags)
+                                .ThenInclude(at => at.Tag)
+                            .Include(a => a.Favorites)
+                            .Include(au => au.Comments);
+
+            var count = await queryable.CountAsync();
+
+            var items = await queryable
                 .Skip(pageNumber * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+
+            return new PagedArticleDto
+            {
+                Articles = items,
+                Count = count
+            };
         }
     }
 }
