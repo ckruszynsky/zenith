@@ -1,11 +1,8 @@
-﻿
-using Zenith.Core.Domain.Entities;
-
-namespace Zenith.Core.Features.Articles
+﻿namespace Zenith.Core.Features.Articles
 {
     public interface IArticleService
     {
-        Task<IEnumerable<Article>> GetArticleFeedAsync(
+        Task<PagedArticleDto> GetArticleFeedAsync(
             int pageNumber,
             int pageSize);
     }

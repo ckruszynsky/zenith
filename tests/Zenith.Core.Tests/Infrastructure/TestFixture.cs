@@ -8,6 +8,7 @@ using Zenith.Common.Date;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
+using Zenith.Core.ServiceManger;
 using Zenith.Core.Tests.Factories;
 
 namespace Zenith.Core.Tests.Infrastructure
@@ -25,6 +26,8 @@ namespace Zenith.Core.Tests.Infrastructure
         protected ICurrentUserContext CurrentUserContext { get; }
 
         protected IDateTime MachineDateTime { get; }
+
+        protected IServiceManager ServiceMgr { get; }
 
         public TestFixture()
         {
@@ -45,6 +48,8 @@ namespace Zenith.Core.Tests.Infrastructure
                 HttpContext = context
             });
 
+            services.AddScoped<IServiceManager, ServiceManager>();
+
             //configure current user accessor as provider
             var serviceProvider = services.BuildServiceProvider();
 
@@ -59,6 +64,7 @@ namespace Zenith.Core.Tests.Infrastructure
             Context = databaseContext;
             UserManager = serviceProvider.GetRequiredService<UserManager<ZenithUser>>();
             CurrentUserContext = new CurrentUserContextTest(UserManager);
+            ServiceMgr = serviceProvider.GetRequiredService<IServiceManager>();
 
         }
 
