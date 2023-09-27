@@ -11,9 +11,19 @@ namespace Zenith.Core.Features.Articles
     public class GetArticlesFeed
     {
         public record Query(
+            int? TagId,
             int PageNumber = 0,
-            int PageSize = 10) : IRequest<PagedResult<IEnumerable<ArticleFeedItem>>>;
+            int PageSize = 10
 
+        ) : IRequest<PagedResult<IEnumerable<ArticleFeedItem>>>;
+
+
+        public class ArticleTagDto
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            
+        }
         public class ArticleFeedItem : IMapFrom<Article>
         {
             public string Slug { get; set; }
@@ -24,13 +34,21 @@ namespace Zenith.Core.Features.Articles
             public int CommentsCount { get; set; }
             public DateTime Created { get; set; }
             public DateTime Updated { get; set; }
+            public List<ArticleTagDto> Tags { get; set; } 
 
-            private void Mapping(Profile profile)
+            public void Mapping(Profile profile)
             {
                 profile
-                .CreateMap<Article, GetArticlesFeed.ArticleFeedItem>()
-               .ForMember(a => a.Author, opts => opts.MapFrom(a => a.Author.NormalizedUserName));
+                    .CreateMap<Article, ArticleFeedItem>()
+                    .ForMember(a => a.Author, opts => opts.MapFrom(a => a.Author.NormalizedUserName))
+                    .ForMember(d => d.Tags, o => o.MapFrom(s => s.ArticleTags));
+
+                profile
+                    .CreateMap<ArticleTag, ArticleTagDto>()
+                    .ForMember(dest => dest.Id, opts => opts.MapFrom(o => o.Id))
+                    .ForMember(dest => dest.Name, opts => opts.MapFrom(o => o.Tag.Name));
             }
+
         }
 
         public class Handler : IRequestHandler<Query, PagedResult<IEnumerable<ArticleFeedItem>>>
@@ -39,27 +57,27 @@ namespace Zenith.Core.Features.Articles
             private readonly IMapper _mapper;
             private readonly ILogger<Handler> _logger;
 
-            public Handler(IServiceManager serviceManager, IMapper mapper, ILogger<GetArticlesFeed.Handler> logger)
+            public Handler(IServiceManager serviceManager, IMapper mapper, ILogger<Handler> logger)
             {
                 _serviceManager = serviceManager;
                 _mapper = mapper;
                 _logger = logger;
             }
 
-            public async Task<PagedResult<IEnumerable<ArticleFeedItem>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<PagedResult<IEnumerable<ArticleFeedItem>>> Handle(Query request,
+                CancellationToken cancellationToken)
             {
-                var pagedArticleDto = await _serviceManager.Article.GetArticleFeedAsync(request.PageNumber, request.PageSize);
+                var pagedArticleDto =
+                    await _serviceManager.Article.GetArticleFeedAsync(request.PageNumber, request.PageSize,
+                        request.TagId);
 
-                var pageInfo = new PagedInfo(request.PageNumber, request.PageSize, pagedArticleDto.Articles.Count(), pagedArticleDto.Count);
+                var pagedInfo = new PagedInfo(request.PageNumber, request.PageSize, pagedArticleDto.Articles.Count(),
+                    pagedArticleDto.Count);
 
-                var result = new Result<IEnumerable<Article>>(pagedArticleDto.Articles)
-                    .Map(a => _mapper.Map<IEnumerable<ArticleFeedItem>>(a))
-                    .ToPagedResult(pageInfo);
+                var articleFeedItems = _mapper.Map<IEnumerable<ArticleFeedItem>>(pagedArticleDto.Articles);
 
-                _logger.LogInformation($"Received request for Article feed with page size: {request.PageSize} and {request.PageNumber} with a result size of: {result.PagedInfo.TotalRecords}");
-                return result;
+                return Result.Success(articleFeedItems).ToPagedResult(pagedInfo);
             }
         }
-
     }
 }

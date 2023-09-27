@@ -4,6 +4,8 @@
     {
         Task<PagedArticleDto> GetArticleFeedAsync(
             int pageNumber,
-            int pageSize);
+            int pageSize,
+            int? tagId);
     }
 }
+ 

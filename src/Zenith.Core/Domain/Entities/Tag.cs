@@ -4,13 +4,9 @@ namespace Zenith.Core.Domain.Entities
 {
     public class Tag : BaseAuditableEntity
     {
-        public Tag()
-        {
-            ArticleTags = new List<ArticleTag>();
-        }
+        
+        public string Name { get; set; }
 
-        public string Description { get; set; }
-
-        public ICollection<ArticleTag> ArticleTags { get; }
+        public virtual ICollection<ArticleTag> ArticleTags { get; }
     }
 }
