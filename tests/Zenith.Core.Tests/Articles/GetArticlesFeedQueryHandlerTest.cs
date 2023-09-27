@@ -20,8 +20,8 @@ namespace Zenith.Core.Tests.Articles
         {
             var pageNumber = 1;
             var pageSize = 1;
-            var expectedPageCount = (int)Math.Ceiling((double)1/pageSize);
-            var expectedTotalCount = 1;
+            var expectedPageCount = (int)Math.Ceiling((double)2/pageSize);
+            var expectedTotalCount = 2;
 
             var query = new GetArticlesFeed.Query(PageNumber: pageNumber, PageSize: pageSize);
 

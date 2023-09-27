@@ -23,7 +23,7 @@ namespace Zenith.Core.Tests.Articles
         [Fact]
         public async Task GivenValidRequest_WithTagAndDefaultPageParameters_ReturnsListArticleFeedItemsFilteredByTag()
         {
-            var expectedTotalCount = 1;
+            var expectedTotalCount = 2;
 
             var query = new SearchArticles.Query("architecture");
 
