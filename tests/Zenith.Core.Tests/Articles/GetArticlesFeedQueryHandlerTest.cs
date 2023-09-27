@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using Zenith.Core.Features.Articles;
+using Zenith.Core.Features.Articles.Models;
 using Zenith.Core.Tests.Infrastructure;
-using static Zenith.Core.Features.Articles.GetArticlesFeed;
+
 
 namespace Zenith.Core.Tests.Articles
 {
@@ -19,7 +20,7 @@ namespace Zenith.Core.Tests.Articles
         {
             var pageNumber = 0;
             var pageSize = 1;
-            var expectedPageCount = 1;
+            var expectedPageCount = (int)Math.Ceiling((double)2/pageSize);
             var expectedTotalCount = 2;
 
             var query = new GetArticlesFeed.Query(pageNumber, pageSize);
@@ -34,9 +35,8 @@ namespace Zenith.Core.Tests.Articles
             response.PagedInfo.PageSize.ShouldBe(pageSize);
             response.PagedInfo.TotalPages.ShouldBe(expectedPageCount);
             response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedItem>>();
-
-
+            response.Value.Any(v => v.Tags.Contains("architecture")).ShouldBe(true);
+            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
     }
 }

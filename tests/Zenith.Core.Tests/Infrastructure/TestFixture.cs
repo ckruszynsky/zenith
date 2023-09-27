@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Zenith.Common.Date;
 using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Users;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
 using Zenith.Core.ServiceManger;
@@ -48,6 +51,8 @@ namespace Zenith.Core.Tests.Infrastructure
                 HttpContext = context
             });
 
+            services.AddScoped<IMapper>(provider => AutoMapperFactory.Create());
+            
             services.AddScoped<IServiceManager, ServiceManager>();
 
             //configure current user accessor as provider
@@ -57,8 +62,12 @@ namespace Zenith.Core.Tests.Infrastructure
             var databaseContext = serviceProvider.GetRequiredService<AppDbContext>();
             AppDbInitializer.Initialize(databaseContext);
 
+            
             // Create the services from configured providers
             Mapper = AutoMapperFactory.Create();
+
+            
+            
             MachineDateTime = new DateTimeTest();
             TokenService = new TokenServiceTest();
             Context = databaseContext;

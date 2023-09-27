@@ -4,6 +4,8 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Zenith.Common.Mapping;
 using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Articles.Dtos;
+using Zenith.Core.Features.Articles.Models;
 using Zenith.Core.ServiceManger;
 
 namespace Zenith.Core.Features.Articles
@@ -14,26 +16,9 @@ namespace Zenith.Core.Features.Articles
             int PageNumber = 0,
             int PageSize = 10) : IRequest<PagedResult<IEnumerable<ArticleFeedItem>>>;
 
-        public class ArticleFeedItem : IMapFrom<Article>
-        {
-            public string Slug { get; set; }
-            public string Title { get; set; }
-            public string Description { get; set; }
-            public string Author { get; set; }
-            public int FavoritesCount { get; set; }
-            public int CommentsCount { get; set; }
-            public DateTime Created { get; set; }
-            public DateTime Updated { get; set; }
+        ) : IRequest<PagedResult<IEnumerable<ArticleFeedViewModel>>>;
 
-            private void Mapping(Profile profile)
-            {
-                profile
-                .CreateMap<Article, GetArticlesFeed.ArticleFeedItem>()
-               .ForMember(a => a.Author, opts => opts.MapFrom(a => a.Author.NormalizedUserName));
-            }
-        }
-
-        public class Handler : IRequestHandler<Query, PagedResult<IEnumerable<ArticleFeedItem>>>
+        public class Handler : IRequestHandler<Query, PagedResult<IEnumerable<ArticleFeedViewModel>>>
         {
             private readonly IServiceManager _serviceManager;
             private readonly IMapper _mapper;
@@ -46,15 +31,17 @@ namespace Zenith.Core.Features.Articles
                 _logger = logger;
             }
 
-            public async Task<PagedResult<IEnumerable<ArticleFeedItem>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<PagedResult<IEnumerable<ArticleFeedViewModel>>> Handle(Query request,
+                CancellationToken cancellationToken)
             {
-                var pagedArticleDto = await _serviceManager.Article.GetArticleFeedAsync(request.PageNumber, request.PageSize);
+                var articleListDto =
+                    await _serviceManager.Article.GetArticleFeedAsync(request);
 
-                var pageInfo = new PagedInfo(request.PageNumber, request.PageSize, pagedArticleDto.Articles.Count(), pagedArticleDto.Count);
+                var pageCount = (int)Math.Ceiling((double)articleListDto.TotalCount / request.PageSize);
+                var pagedInfo = new PagedInfo(request.PageNumber, request.PageSize, pageCount,
+                    articleListDto.TotalCount);
 
-                var result = new Result<IEnumerable<Article>>(pagedArticleDto.Articles)
-                    .Map(a => _mapper.Map<IEnumerable<ArticleFeedItem>>(a))
-                    .ToPagedResult(pageInfo);
+                var articleFeedItems = _mapper.Map<IEnumerable<ArticleFeedViewModel>>(articleListDto.Articles);
 
                 _logger.LogInformation($"Received request for Article feed with page size: {request.PageSize} and {request.PageNumber} with a result size of: {result.PagedInfo.TotalRecords}");
                 return result;
