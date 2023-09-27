@@ -13,10 +13,9 @@ namespace Zenith.Core.Features.Articles
     public class GetArticlesFeed
     {
         public record Query(
+            int? TagId =null,
             int PageNumber = 0,
-            int PageSize = 10) : IRequest<PagedResult<IEnumerable<ArticleFeedItem>>>;
-
-        ) : IRequest<PagedResult<IEnumerable<ArticleFeedViewModel>>>;
+            int PageSize = 10): IRequest<PagedResult<IEnumerable<ArticleFeedViewModel>>>;
 
         public class Handler : IRequestHandler<Query, PagedResult<IEnumerable<ArticleFeedViewModel>>>
         {
@@ -43,8 +42,7 @@ namespace Zenith.Core.Features.Articles
 
                 var articleFeedItems = _mapper.Map<IEnumerable<ArticleFeedViewModel>>(articleListDto.Articles);
 
-                _logger.LogInformation($"Received request for Article feed with page size: {request.PageSize} and {request.PageNumber} with a result size of: {result.PagedInfo.TotalRecords}");
-                return result;
+                return Result.Success(articleFeedItems).ToPagedResult(pagedInfo);
             }
         }
 

@@ -9,8 +9,7 @@ namespace Zenith.Core.Domain.Entities
             ArticleTags = new List<ArticleTag>();
         }
 
-        public string Description { get; set; }
-
-        public ICollection<ArticleTag> ArticleTags { get; }
+        public string Name { get; set; }
+        public virtual ICollection<ArticleTag> ArticleTags { get; }
     }
 }

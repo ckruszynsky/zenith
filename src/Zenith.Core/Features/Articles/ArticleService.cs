@@ -22,7 +22,7 @@ namespace Zenith.Core.Features.Articles
 
         public async Task<ArticleListDto> GetArticleFeedAsync(GetArticlesFeed.Query request)
         {
-            var tagId = request.TagId;
+            int? tagId = request.TagId;
 
             if (!tagId.HasValue)
             {

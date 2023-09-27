@@ -93,22 +93,22 @@ namespace Zenith.Core.Infrastructure.Persistence
         {
             var testTag1 = new Tag
             {
-                Description = "architecture"
+                Name = "architecture"
             };
 
             var testTag2 = new Tag
             {
-                Description = "vertical slice"
+                Name = "vertical slice"
             };
 
             var testTag3 = new Tag
             {
-                Description = "development"
+                Name = "development"
             };
 
             var testTag4 = new Tag
             {
-                Description = "clean code"
+                Name = "clean code"
             };
 
             context.Tags.Add(testTag1);
