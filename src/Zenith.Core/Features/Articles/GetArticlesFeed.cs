@@ -23,7 +23,7 @@ namespace Zenith.Core.Features.Articles
             private readonly IMapper _mapper;
             private readonly ILogger<Handler> _logger;
 
-            public Handler(IServiceManager serviceManager, IMapper mapper, ILogger<GetArticlesFeed.Handler> logger)
+            public Handler(IServiceManager serviceManager, IMapper mapper, ILogger<Handler> logger)
             {
                 _serviceManager = serviceManager;
                 _mapper = mapper;
@@ -45,6 +45,5 @@ namespace Zenith.Core.Features.Articles
                 return Result.Success(articleFeedItems).ToPagedResult(pagedInfo);
             }
         }
-
     }
 }

@@ -49,7 +49,7 @@ namespace Zenith.Core.Features.Articles
             var queryable = _appDbContext.Articles
                             .Include(a => a.Author)
                                 .ThenInclude(au => au.Followers)
-                            .Include(a => a.ArticleTags)
+                            .Include(a => a.ArticleTags.Where(at=> at.TagId == tagId))
                                 .ThenInclude(at => at.Tag)
                             .Include(a => a.Favorites)
                             .Include(au => au.Comments);

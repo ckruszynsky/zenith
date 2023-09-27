@@ -18,7 +18,7 @@ namespace Zenith.Core.Tests.Articles
         [Fact]
         public async Task GivenValidRequest_WithPageNumberAndPageSize_ReturnsListArticleFeedItems()
         {
-            var pageNumber = 0;
+            var pageNumber = 1;
             var pageSize = 1;
             var expectedPageCount = (int)Math.Ceiling((double)1/pageSize);
             var expectedTotalCount = 1;
