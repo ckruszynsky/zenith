@@ -1,4 +1,4 @@
-﻿using Zenith.Core.Features.Articles;
+﻿using Zenith.Core.Features.Articles.Contracts;
 
 namespace Zenith.Core.ServiceManger
 {

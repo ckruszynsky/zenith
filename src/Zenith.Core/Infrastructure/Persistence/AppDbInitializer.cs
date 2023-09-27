@@ -131,7 +131,7 @@ namespace Zenith.Core.Infrastructure.Persistence
             var testArticleTag1 = new ArticleTag
             {
                 ArticleId = articleId,
-                TagId = testTag1.Id
+                TagId = testTag3.Id
             };
 
             var testArticleTag2 = new ArticleTag
@@ -143,7 +143,7 @@ namespace Zenith.Core.Infrastructure.Persistence
             var testArticleTag3 = new ArticleTag
             {
                 ArticleId = context.Articles.FirstOrDefault(a => a.Slug == "developing-application-aspnet-core").Id,
-                TagId = testTag3.Id
+                TagId = testTag1.Id
             };
 
             var testArticleTag4 = new ArticleTag
