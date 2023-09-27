@@ -83,7 +83,18 @@ namespace Zenith.Core.Infrastructure.Persistence
                 LastModified = DateTime.Now
             };
 
-            context.Articles.AddRange(testArticle, testArticle2);
+            var testArticle3 = new Article
+            {
+                Title = "Developing Application in ASPNET Core 2",
+                Description = "How to develop applications using ASPNET Core2",
+                Body = "This is the body of the article",
+                Slug = "developing-application-aspnet-core-2",
+                AuthorId = context.Users.FirstOrDefault(u => string.Equals(u.UserName, "test.user2", StringComparison.OrdinalIgnoreCase))?.Id,
+                Created = DateTime.Now,
+                LastModified = DateTime.Now
+            };
+
+            context.Articles.AddRange(testArticle, testArticle2, testArticle3);
             context.SaveChanges();
             articleId = testArticle.Id;
 
@@ -93,22 +104,22 @@ namespace Zenith.Core.Infrastructure.Persistence
         {
             var testTag1 = new Tag
             {
-                Description = "architecture"
+                Name = "architecture"
             };
 
             var testTag2 = new Tag
             {
-                Description = "vertical slice"
+                Name = "vertical slice"
             };
 
             var testTag3 = new Tag
             {
-                Description = "development"
+                Name = "development"
             };
 
             var testTag4 = new Tag
             {
-                Description = "clean code"
+                Name = "clean code"
             };
 
             context.Tags.Add(testTag1);
@@ -135,9 +146,17 @@ namespace Zenith.Core.Infrastructure.Persistence
                 TagId = testTag3.Id
             };
 
+            var testArticleTag4 = new ArticleTag
+            {
+                ArticleId = context.Articles.FirstOrDefault(a => a.Slug == "developing-application-aspnet-core-2").Id,
+                TagId = testTag1.Id
+            };
+
+            
             context.ArticleTags.Add(testArticleTag1);
             context.ArticleTags.Add(testArticleTag2);
             context.ArticleTags.Add(testArticleTag3);
+            context.ArticleTags.Add(testArticleTag4);
             context.SaveChanges();
         }
 

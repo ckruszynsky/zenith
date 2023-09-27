@@ -17,12 +17,12 @@ namespace Zenith.Core.Tests.Articles
         [Fact]
         public async Task GivenValidRequest_WithPageNumberAndPageSize_ReturnsListArticleFeedItems()
         {
-            var pageNumber = 0;
+            var pageNumber = 1;
             var pageSize = 1;
             var expectedPageCount = 1;
-            var expectedTotalCount = 2;
+            var expectedTotalCount = 3;
 
-            var query = new GetArticlesFeed.Query(pageNumber, pageSize);
+            var query = new GetArticlesFeed.Query(null,pageNumber, pageSize);
 
             var handler = new GetArticlesFeed.Handler(ServiceMgr, Mapper, _logger);
 
@@ -34,9 +34,8 @@ namespace Zenith.Core.Tests.Articles
             response.PagedInfo.PageSize.ShouldBe(pageSize);
             response.PagedInfo.TotalPages.ShouldBe(expectedPageCount);
             response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
+            response.Value.First().Tags.First().Name.ShouldBe("architecture");
             response.Value.ShouldBeOfType<List<ArticleFeedItem>>();
-
-
         }
     }
 }
