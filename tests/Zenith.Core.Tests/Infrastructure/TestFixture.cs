@@ -62,7 +62,6 @@ namespace Zenith.Core.Tests.Infrastructure
             var databaseContext = serviceProvider.GetRequiredService<AppDbContext>();
             AppDbInitializer.Initialize(databaseContext);
 
-            
             // Create the services from configured providers
             Mapper = AutoMapperFactory.Create();
 
