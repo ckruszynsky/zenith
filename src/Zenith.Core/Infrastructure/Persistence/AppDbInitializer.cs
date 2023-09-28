@@ -13,11 +13,11 @@ namespace Zenith.Core.Infrastructure.Persistence
         public static void SeedEntities(AppDbContext context)
         {
             SeedUsers(context, out string userId, out string testUserId);
-            SeedUserFollows(context, testUserId, userId);
-            SeedArticles(context, userId, out int articleId);
-            SeedFavorites(context, articleId, userId);
-            SeedTags(context, articleId);
-            SeedComments(context, userId, articleId);
+            //SeedUserFollows(context, testUserId, userId);
+            //SeedArticles(context, userId, out int articleId);
+            //SeedFavorites(context, articleId, userId);
+            //SeedTags(context, articleId);
+            //SeedComments(context, userId, articleId);
 
         }
 
