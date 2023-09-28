@@ -22,22 +22,29 @@ namespace Zenith.Core.Features.Articles.Dtos
         public string Body { get; set; }
 
         public List<ArticleTagDto> Tags { get; set; }
+        
+        public bool Favorited { get; set; }
+
+        public bool Following { get; set; }
 
         public int FavoritesCount { get; set; }
 
         public int CommentsCount { get; set; }
 
-        public ArticleAuthorDto Author { get; set; }
-
+        public ArticleAuthorDto Author { get; set; } 
         public DateTime Created { get; set; }
 
         public DateTime Updated { get; set; }
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<Article,ArticleDto>()
+
+            profile.CreateMap<Article, ArticleDto>()
                 .ForMember(dest => dest.Tags, opts => opts.MapFrom(source => source.ArticleTags))
-                .ForMember(dest => dest.Author, opts => opts.MapFrom(source => source.Author));
+                .ForMember(dest => dest.Author, opts => opts.MapFrom(source => source.Author))
+                .ForMember(dest => dest.Favorited, opts => opts.Ignore())
+                .ForMember(dest => dest.Following, opts => opts.Ignore());
+
         }
     }
 }

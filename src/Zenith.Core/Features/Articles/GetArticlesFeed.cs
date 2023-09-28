@@ -6,6 +6,7 @@ using Zenith.Common.Mapping;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Articles.Models;
+using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.ServiceManger;
 
 namespace Zenith.Core.Features.Articles
@@ -22,19 +23,22 @@ namespace Zenith.Core.Features.Articles
             private readonly IServiceManager _serviceManager;
             private readonly IMapper _mapper;
             private readonly ILogger<Handler> _logger;
+            private readonly ICurrentUserContext _currentUserContext;
 
-            public Handler(IServiceManager serviceManager, IMapper mapper, ILogger<Handler> logger)
+            public Handler(IServiceManager serviceManager, IMapper mapper, ILogger<Handler> logger, ICurrentUserContext currentUserContext)
             {
                 _serviceManager = serviceManager;
                 _mapper = mapper;
                 _logger = logger;
+                _currentUserContext = currentUserContext;
             }
 
             public async Task<PagedResult<IEnumerable<ArticleFeedViewModel>>> Handle(Query request,
                 CancellationToken cancellationToken)
             {
+                var user = await _currentUserContext.GetCurrentUserContext();
                 var articleListDto =
-                    await _serviceManager.Article.GetArticleFeedAsync(request);
+                    await _serviceManager.Article.GetArticleFeedAsync(request, user.Id);
 
                 var pageCount = (int)Math.Ceiling((double)articleListDto.TotalCount / request.PageSize);
                 var pagedInfo = new PagedInfo(request.PageNumber, request.PageSize, pageCount,

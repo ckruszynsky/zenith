@@ -19,6 +19,8 @@ namespace Zenith.Core.Features.Articles.Models
         public string Title { get; set; }
         public string Description { get; set; }
         public List<string> Tags { get; set; }
+        public bool Favorited { get; set; }
+        public bool Following { get; set; }
 
         public void Mapping(Profile profile)
         {

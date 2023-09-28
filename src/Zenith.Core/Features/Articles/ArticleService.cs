@@ -20,7 +20,7 @@ namespace Zenith.Core.Features.Articles
             _mapper = mapper;
         }
 
-        public async Task<ArticleListDto> GetArticleFeedAsync(GetArticlesFeed.Query request)
+        public async Task<ArticleListDto> GetArticleFeedAsync(GetArticlesFeed.Query request, string userId)
         {
             var tagId = request.TagId ?? await GetTagWithMostArticles();
 
@@ -32,53 +32,33 @@ namespace Zenith.Core.Features.Articles
 
             var count = await items.CountAsync();
                 
-             var result  = await items
+             var articleEntities  = await items
                 .Skip(request.PageNumber * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync();
-             
+
+            var user = GetArticleUserQueryable(userId);
+
+            var articleDtos = _mapper.Map<IEnumerable<ArticleDto>>(articleEntities);
+            UpdateArticleFollowing(user, articleDtos, articleEntities);
+
             return new ArticleListDto
             {
-                Articles = _mapper.Map<List<ArticleDto>>(result),
+                Articles = articleDtos ?? new List<ArticleDto>(),
                 TotalCount = count
             };
         }
 
-        private async Task<int?> GetTagWithMostArticles()
-        {
-            int? tagId;
-            var tags = _appDbContext
-                .ArticleTags
-                .Select(a => new {Id = a.TagId})
-                .Distinct();
-
-            var tagGroupBy = await tags.GroupBy(p => p.Id)
-                .Select(b => new {tagId = b.Key, Count = b.Count()})
-                .OrderByDescending(c => c.Count)
-                .FirstOrDefaultAsync();
-
-            if (tagGroupBy != null)
-            {
-                tagId = tagGroupBy.tagId;
-            }
-            else
-            {
-                return null;
-            }
-
-            return tagId;
-        }
-
         public async Task<ArticleListDto> SearchAsync(SearchArticles.Query request, string userId)
         {
-            int totalRecords = 0;
+        
             var noResults = new ArticleListDto
             {
                 Articles = new List<ArticleDto>(),
                 TotalCount = 0
             };
             
-            IQueryable<Article> query = null;
+            IQueryable<Article>? query = null;
             
             var queryable = GetArticleQueryable();
 
@@ -97,22 +77,114 @@ namespace Zenith.Core.Features.Articles
                 query = SearchArticlesByTitle(request, queryable);
             }
 
+            if (request.IncludeOnlyFavorite.HasValue && request.IncludeOnlyFavorite.Value)
+            {
+                query = GetFavoritedArticles(userId, queryable);
+            }
 
             if (query == null) return noResults;
             
-            totalRecords = query.Count();
+            var totalRecords = query.Count();
 
-            var items = query
+            var articleEntities = query
                 .Skip(request.CurrentPage * request.PageSize)
                 .Take(request.PageSize)
-                .ProjectTo<ArticleDto>(_mapper.ConfigurationProvider)
                 .ToList();
+
+            var user = GetArticleUserQueryable(userId);
+
+            var articleDtos = _mapper.Map<IEnumerable<ArticleDto>>(articleEntities);
+            UpdateArticleFollowing(user, articleDtos, articleEntities);
 
             return new ArticleListDto
             {
-                Articles = items,
+                Articles = articleDtos ?? new List<ArticleDto>(),
                 TotalCount = totalRecords
             };
+
+        }
+
+      
+        public async Task<ArticleDto?> GetArticleAsync(GetArticle.Query request, string userId)
+        {
+            var user = GetArticleUserQueryable(userId);
+            
+            IQueryable<Article>? query = GetArticleQueryable();
+            
+            var articleEntity = query.FirstOrDefault(a => a.Slug == request.slug);
+            var articleDto = _mapper.Map<ArticleDto>(articleEntity);
+
+            if (articleEntity == null) return null;
+            if (user == null) return articleDto;
+
+            articleDto.Following = IsAuthorFollowedByUser(articleEntity, user);
+            articleDto.Favorited = IsArticleFavoritedByUser(articleEntity, user);
+
+            return articleDto;
+
+        }
+
+        private void UpdateArticleFollowing(ZenithUser? user, IEnumerable<ArticleDto> articleDtos, List<Article> articleEntities)
+        {
+            if (user != null)
+            {
+                foreach (var articleDto in articleDtos)
+                {
+                    var entity = articleEntities.Single(a => a.Id == articleDto.Id);
+                    articleDto.Following = IsAuthorFollowedByUser(entity, user);
+                    articleDto.Favorited = IsArticleFavoritedByUser(entity, user);
+                }
+            }
+        }
+
+
+        public bool IsArticleFavoritedByUser(Article articleEntity, ZenithUser user)
+        {
+            return articleEntity.Favorites.Any(f => f.User == user);
+        }
+        public bool IsAuthorFollowedByUser(Article articleEntity, ZenithUser user)
+        {
+           return articleEntity.Author.Followers.Any(f => f.UserFollower == user);
+                
+        }
+        
+        private IQueryable<Article>? GetFavoritedArticles(string userId, IIncludableQueryable<Article, ICollection<Comment>> queryable)
+        {
+            IQueryable<Article>? query;
+            var user = GetArticleUserQueryable(userId);
+
+            return user != null
+                ? queryable
+                    .Where(q => q.Favorites.Select(f => f.User).Contains(user))
+                : null;
+        }
+
+        private ZenithUser? GetArticleUserQueryable(string userId)
+        {
+            return _appDbContext.Users
+                .Include(u=> u.Followers)
+                .Include(u => u.Favorites)
+                .FirstOrDefault(u => u.Id == userId);
+        }
+
+        
+        private async Task<int?> GetTagWithMostArticles()
+        {
+            int? tagId;
+            var tags = _appDbContext
+                .ArticleTags
+                .Select(a => new { Id = a.TagId })
+                .Distinct();
+
+            var tagGroupBy = await tags.GroupBy(p => p.Id)
+                .Select(b => new { tagId = b.Key, Count = b.Count() })
+                .OrderByDescending(c => c.Count)
+                .FirstOrDefaultAsync();
+
+            if (tagGroupBy == null) return null;
+            tagId = tagGroupBy.tagId;
+
+            return tagId;
 
         }
 
@@ -130,16 +202,14 @@ namespace Zenith.Core.Features.Articles
 
         private static IQueryable<Article> SearchArticlesByTitle(SearchArticles.Query request, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
-            var query = queryable
+            return queryable
                 .Where(q => q.Title.ToLowerInvariant().Contains(request.SearchText.ToLowerInvariant()));
-            return query;
         }
 
         private static IQueryable<Article> GetArticlesByAuthor(SearchArticles.Query request, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
-            var query = queryable
+            return queryable
                 .Where(q => q.Author.UserName == request.Author);
-            return query;
         }
 
         private async Task<IQueryable<Article>> GetArticlesByTagName(SearchArticles.Query request, IIncludableQueryable<Article, ICollection<Comment>> queryable)
@@ -148,9 +218,8 @@ namespace Zenith.Core.Features.Articles
                 .Select(t => t.Id)
                 .FirstOrDefaultAsync();
 
-            var query = queryable
+            return queryable
                 .Where(q => q.ArticleTags.Any(k => k.TagId == tagId));
-            return query;
         }
     }
 }
