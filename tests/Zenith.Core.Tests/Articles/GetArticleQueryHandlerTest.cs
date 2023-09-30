@@ -68,7 +68,7 @@ namespace Zenith.Core.Tests.Articles
             Context.Articles.AddRange(articles);
             await Context.SaveChangesAsync();
 
-            var request = new GetArticle.Query(slug:"test-article");
+            var request = new GetArticle.Query(Slug:"test-article");
             var handler = new GetArticle.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
             var response = await handler.Handle(request, CancellationToken.None);
 
@@ -83,7 +83,7 @@ namespace Zenith.Core.Tests.Articles
         public async Task GivenValidRequest_WhenArticleDoesNotExist_ReturnsErrorResult()
         {
             var expectedTitle = "Test Article";
-            var request = new GetArticle.Query(slug: "test-article");
+            var request = new GetArticle.Query(Slug: "test-article");
             var handler = new GetArticle.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
             var response = await handler.Handle(request, CancellationToken.None);
 

@@ -7,7 +7,7 @@ using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles;
 using Zenith.Core.Features.Articles.Models;
 using Zenith.Core.Tests.Infrastructure;
-
+using Zenith.Core.Features.Articles.Dtos;
 
 namespace Zenith.Core.Tests.Articles
 {
@@ -72,7 +72,11 @@ namespace Zenith.Core.Tests.Articles
             var expectedTagName = "unit testing";
             
 
-            var query = new GetArticlesFeed.Query(PageNumber: pageNumber, PageSize: pageSize);
+            var query = new GetArticlesFeed.Query(new ArticleFeedDto
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
 
             var handler = new GetArticlesFeed.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -146,7 +150,11 @@ namespace Zenith.Core.Tests.Articles
             var expectedTagName = "unit testing";
 
 
-            var query = new GetArticlesFeed.Query(PageNumber: pageNumber, PageSize: pageSize);
+            var query = new GetArticlesFeed.Query(new ArticleFeedDto
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
 
             var handler = new GetArticlesFeed.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -220,7 +228,11 @@ namespace Zenith.Core.Tests.Articles
             var expectedTagName = "unit testing";
 
 
-            var query = new GetArticlesFeed.Query(PageNumber: pageNumber, PageSize: pageSize);
+            var query = new GetArticlesFeed.Query(new ArticleFeedDto
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            });
 
             var handler = new GetArticlesFeed.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 

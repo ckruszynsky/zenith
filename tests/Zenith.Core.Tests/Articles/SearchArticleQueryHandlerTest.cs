@@ -11,7 +11,7 @@ using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Models;
 using Zenith.Core.Tests.Infrastructure;
 using Zenith.Core.Features.Articles;
-
+using Zenith.Core.Features.Articles.Dtos;
 namespace Zenith.Core.Tests.Articles
 {
     public class SearchArticleQueryHandlerTest : TestFixture
@@ -63,7 +63,7 @@ namespace Zenith.Core.Tests.Articles
             var tagFilter = "unit testing";
 
             //act
-            var query = new SearchArticles.Query(Tag:tagFilter);
+            var query = new SearchArticles.Query(new ArticleSearchDto { Tag = tagFilter});
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -119,7 +119,10 @@ namespace Zenith.Core.Tests.Articles
             var authorFilter = userTestData[0].UserName;
 
             //act 
-            var query = new SearchArticles.Query(Author:authorFilter);
+            var query = new SearchArticles.Query(new Features.Articles.Dtos.ArticleSearchDto
+            {
+                Author = authorFilter
+            });
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
             var response = await handler.Handle(query, CancellationToken.None);
 
@@ -172,8 +175,11 @@ namespace Zenith.Core.Tests.Articles
             var authorFilter = userTestData[0].UserName;
 
             var query = new SearchArticles.Query(
-                Tag:tagFilter,
-                Author:authorFilter);
+                new ArticleSearchDto
+                {
+                    Tag = tagFilter,
+                    Author = authorFilter
+                });
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -234,7 +240,10 @@ namespace Zenith.Core.Tests.Articles
             var expectedAuthor = userTestData[0].UserName;
 
             var query = new SearchArticles.Query(
-                SearchText: searchText);
+                new ArticleSearchDto
+                {
+                    SearchText = searchText
+                });                
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -302,8 +311,11 @@ namespace Zenith.Core.Tests.Articles
             var expectedAuthor = userTestData[0].UserName;
 
             var query = new SearchArticles.Query(
-                Tag: expectedTag,
-                SearchText: searchText);
+                new ArticleSearchDto
+                {
+                    Tag = expectedTag,
+                    SearchText = searchText
+                });
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -366,9 +378,12 @@ namespace Zenith.Core.Tests.Articles
             var searchText = "Modern";
 
             var query = new SearchArticles.Query(
-                Tag: tagFilter,
-                Author: authorFilter,
-                SearchText: searchText);
+                new ArticleSearchDto
+                {
+                    Tag = tagFilter,
+                    Author = authorFilter,
+                    SearchText = searchText
+                });
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -437,7 +452,10 @@ namespace Zenith.Core.Tests.Articles
             var expectedAuthor = userTestData[0].UserName;
 
             var query = new SearchArticles.Query(
-                IncludeOnlyFavorite:true);
+                new ArticleSearchDto
+                {
+                    IncludeOnlyFavorites = true
+                });                
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -512,9 +530,12 @@ namespace Zenith.Core.Tests.Articles
             var expectedAuthor = userTestData[0].UserName;
 
             var query = new SearchArticles.Query(
-                SearchText:"Vertical",
-                IncludeOnlyFavorite: true);
-
+                new ArticleSearchDto
+                {
+                    SearchText = "Vertical",
+                    IncludeOnlyFavorites = true
+                });
+                
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
             var response = await handler.Handle(query, CancellationToken.None);
@@ -588,8 +609,11 @@ namespace Zenith.Core.Tests.Articles
             var expectedAuthor = userTestData[0].UserName;
             var expectedTag = "unit testing";
             var query = new SearchArticles.Query(
-                Tag:expectedTag,
-                IncludeOnlyFavorite: true);
+                new ArticleSearchDto
+                {
+                    Tag= expectedTag,
+                    IncludeOnlyFavorites = true
+                });
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -665,9 +689,12 @@ namespace Zenith.Core.Tests.Articles
             var expectedAuthor = userTestData[0].UserName;
             var expectedTag = "unit testing";
             var query = new SearchArticles.Query(
-                Author:expectedAuthor,
-                Tag: expectedTag,
-                IncludeOnlyFavorite: true);
+                new ArticleSearchDto
+                {
+                    Author = expectedAuthor,
+                    Tag = expectedTag,
+                    IncludeOnlyFavorites = true
+                });              
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -719,7 +746,10 @@ namespace Zenith.Core.Tests.Articles
 
             var expectedTotalCount = 0;
             var query = new SearchArticles.Query(
-                SearchText:"NonExistent");
+                new ArticleSearchDto
+                {
+                    SearchText = "NonExistent"
+                });
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -769,7 +799,10 @@ namespace Zenith.Core.Tests.Articles
 
             var expectedTotalCount = 0;
             var query = new SearchArticles.Query(
-                Tag: "NonExistent");
+                new ArticleSearchDto
+                {
+                    Tag= "NonExistent"
+                });                
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -818,7 +851,10 @@ namespace Zenith.Core.Tests.Articles
 
             var expectedTotalCount = 0;
             var query = new SearchArticles.Query(
-                Author: "NonExistent");
+                new Features.Articles.Dtos.ArticleSearchDto
+                {
+                    Author= "NonExistent"
+                });
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -867,7 +903,7 @@ namespace Zenith.Core.Tests.Articles
 
             var expectedTotalCount = 0;
             var query = new SearchArticles.Query(
-                IncludeOnlyFavorite:true);
+                new ArticleSearchDto {  IncludeOnlyFavorites = true });                
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -916,8 +952,11 @@ namespace Zenith.Core.Tests.Articles
 
             var expectedTotalCount = 0;
             var query = new SearchArticles.Query(
-                SearchText:"NonExistent",
-                Tag:"unit testing");
+               new ArticleSearchDto
+               {
+                   SearchText= "NonExistent",
+                   Tag = "unit testing"
+               });
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -967,9 +1006,12 @@ namespace Zenith.Core.Tests.Articles
 
             var expectedTotalCount = 0;
             var query = new SearchArticles.Query(
-                Author: articleTestData[0].Author.UserName,
-                SearchText: "NonExistent",
-                Tag: "unit testing");
+                new ArticleSearchDto
+                {
+                    Author = articleTestData[0].Author.UserName,
+                    SearchText = "NonExistent",
+                    Tag = "unit testing"
+                });                
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
@@ -1019,10 +1061,14 @@ namespace Zenith.Core.Tests.Articles
 
             var expectedTotalCount = 0;
             var query = new SearchArticles.Query(
-                Author: articleTestData[0].Author.UserName,
-                IncludeOnlyFavorite:true,
-                SearchText: "NonExistent",
-                Tag: "unit testing");
+                new ArticleSearchDto
+                {
+                    Author = articleTestData[0].Author.UserName,
+                    SearchText = "NonExistent",
+                    Tag = "unit testing",
+                    IncludeOnlyFavorites = true
+                });
+                
 
             var handler = new SearchArticles.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
 
