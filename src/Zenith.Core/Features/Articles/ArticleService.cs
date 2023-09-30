@@ -1,10 +1,15 @@
-﻿using AutoMapper;
+﻿using System.Collections;
+using Ardalis.GuardClauses;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Zenith.Common.Exceptions;
+using Zenith.Common.Extensions;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Contracts;
 using Zenith.Core.Features.Articles.Dtos;
+using Zenith.Core.Features.Tags.Dtos;
 using Zenith.Core.Infrastructure.Persistence;
 
 namespace Zenith.Core.Features.Articles
@@ -20,9 +25,12 @@ namespace Zenith.Core.Features.Articles
             _mapper = mapper;
         }
 
-        public async Task<ArticleListDto> GetArticleFeedAsync(GetArticlesFeed.Query request, string userId)
+        public async Task<ArticleListDto> GetArticleFeedAsync(ArticleFeedDto feedParameters, string userId)
         {
-            var tagId = request.TagId ?? await GetTagWithMostArticles();
+            Guard.Against.Null(feedParameters, nameof(feedParameters));
+            Guard.Against.NullOrEmpty(userId, nameof(userId));
+
+            var tagId = feedParameters.TagId ?? await GetTagWithMostArticles();
 
             var queryable = GetArticleQueryable();
 
@@ -33,15 +41,14 @@ namespace Zenith.Core.Features.Articles
             var count = await items.CountAsync();
                 
              var articleEntities  = await items
-                .Skip(request.PageNumber * request.PageSize)
-                .Take(request.PageSize)
+                .Skip(feedParameters.PageNumber * feedParameters.PageSize)
+                .Take(feedParameters.PageSize)
                 .ToListAsync();
 
             var user = GetArticleUserQueryable(userId);
 
             var articleDtos = _mapper.Map<IEnumerable<ArticleDto>>(articleEntities);
-            UpdateArticleFollowing(user, articleDtos, articleEntities);
-
+            articleDtos.UpdateArticleFollowing(user, articleEntities);            
             return new ArticleListDto
             {
                 Articles = articleDtos ?? new List<ArticleDto>(),
@@ -49,9 +56,11 @@ namespace Zenith.Core.Features.Articles
             };
         }
 
-        public async Task<ArticleListDto> SearchAsync(SearchArticles.Query request, string userId)
+        public async Task<ArticleListDto> SearchAsync(ArticleSearchDto searchParameters, string userId)
         {
-        
+            Guard.Against.Null(searchParameters, nameof(searchParameters));
+            Guard.Against.NullOrEmpty(userId, nameof(userId));
+
             var noResults = new ArticleListDto
             {
                 Articles = new List<ArticleDto>(),
@@ -62,22 +71,22 @@ namespace Zenith.Core.Features.Articles
             
             var queryable = GetArticleQueryable();
 
-            if (!string.IsNullOrEmpty(request.Tag))
+            if (!string.IsNullOrEmpty(searchParameters.Tag))
             {
-                query = await GetArticlesByTagName(request, queryable);
+                query = await GetArticlesByTagName(searchParameters, queryable);
             }
 
-            if (!string.IsNullOrEmpty(request.Author))
+            if (!string.IsNullOrEmpty(searchParameters.Author))
             {
-                query = GetArticlesByAuthor(request, queryable);
+                query = searchParameters.GetArticlesByAuthor(queryable);                
             }
 
-            if (!string.IsNullOrEmpty(request.SearchText))
+            if (!string.IsNullOrEmpty(searchParameters.SearchText))
             {
-                query = SearchArticlesByTitle(request, queryable);
+                query = searchParameters.SearchArticlesByTitle(queryable);
             }
 
-            if (request.IncludeOnlyFavorite.HasValue && request.IncludeOnlyFavorite.Value)
+            if (searchParameters.IncludeOnlyFavorites.HasValue && searchParameters.IncludeOnlyFavorites.Value)
             {
                 query = GetFavoritedArticles(userId, queryable);
             }
@@ -87,15 +96,18 @@ namespace Zenith.Core.Features.Articles
             var totalRecords = query.Count();
 
             var articleEntities = query
-                .Skip(request.CurrentPage * request.PageSize)
-                .Take(request.PageSize)
+                .Skip(searchParameters.CurrentPage * searchParameters.PageSize)
+                .Take(searchParameters.PageSize)
                 .ToList();
 
             var user = GetArticleUserQueryable(userId);
 
             var articleDtos = _mapper.Map<IEnumerable<ArticleDto>>(articleEntities);
-            UpdateArticleFollowing(user, articleDtos, articleEntities);
+            
+            if(!articleDtos.Any()) return noResults;
 
+            articleDtos.UpdateArticleFollowing(user, articleEntities);
+            
             return new ArticleListDto
             {
                 Articles = articleDtos ?? new List<ArticleDto>(),
@@ -103,53 +115,70 @@ namespace Zenith.Core.Features.Articles
             };
 
         }
-
       
-        public async Task<ArticleDto?> GetArticleAsync(GetArticle.Query request, string userId)
+        public async Task<ArticleDto?> GetArticleAsync(string slug, string userId)
         {
+            Guard.Against.NullOrEmpty(slug, nameof(slug));
+            Guard.Against.NullOrEmpty(userId, nameof(userId));
+
             var user = GetArticleUserQueryable(userId);
             
             IQueryable<Article>? query = GetArticleQueryable();
             
-            var articleEntity = query.FirstOrDefault(a => a.Slug == request.slug);
+            var articleEntity = await query.FirstOrDefaultAsync(a => a.Slug == slug);
             var articleDto = _mapper.Map<ArticleDto>(articleEntity);
 
             if (articleEntity == null) return null;
             if (user == null) return articleDto;
 
-            articleDto.Following = IsAuthorFollowedByUser(articleEntity, user);
-            articleDto.Favorited = IsArticleFavoritedByUser(articleEntity, user);
+            articleDto.Following = articleEntity.IsAuthorFollowedByUser(user);
+            articleDto.Favorited = articleEntity.IsArticleFavoritedByUser(user);
 
             return articleDto;
 
         }
 
-        private void UpdateArticleFollowing(ZenithUser? user, IEnumerable<ArticleDto> articleDtos, List<Article> articleEntities)
+        public async Task<ArticleDto> CreateArticleAsync(CreateArticleDto newArticle, string userId, IEnumerable<TagDto> tags)
         {
-            if (user != null)
+            Guard.Against.Null(newArticle, nameof(newArticle));
+            Guard.Against.NullOrEmpty(userId, nameof(userId));
+            var tagDtos = tags.ToList();
+            Guard.Against.NullOrEmpty(tagDtos, nameof(tags));
+
+
+            var articleEntity = _mapper.Map<Article>(newArticle);            
+            articleEntity.AuthorId = userId;
+            articleEntity.Slug = newArticle.Title.ToSlug();
+
+            var existingArticle = await _appDbContext.Articles.FirstOrDefaultAsync(a => a.Slug == articleEntity.Slug);
+            if (existingArticle != null)
             {
-                foreach (var articleDto in articleDtos)
-                {
-                    var entity = articleEntities.Single(a => a.Id == articleDto.Id);
-                    articleDto.Following = IsAuthorFollowedByUser(entity, user);
-                    articleDto.Favorited = IsArticleFavoritedByUser(entity, user);
-                }
+                throw new EntityExistsException($"Article with slug {articleEntity.Slug} already exists");
             }
-        }
 
+            foreach (var tag in tagDtos)
+            {
+                articleEntity.ArticleTags.Add(new ArticleTag
+                {
+                    Article = articleEntity,
+                    TagId = tag.Id
+                });
+            }
 
-        public bool IsArticleFavoritedByUser(Article articleEntity, ZenithUser user)
-        {
-            return articleEntity.Favorites.Any(f => f.User == user);
+            await _appDbContext.Articles.AddAsync(articleEntity);
+            await _appDbContext.SaveChangesAsync();
+
+            var articleDto = _mapper.Map<ArticleDto>(articleEntity);
+
+            return articleDto;
         }
-        public bool IsAuthorFollowedByUser(Article articleEntity, ZenithUser user)
-        {
-           return articleEntity.Author.Followers.Any(f => f.UserFollower == user);
-                
-        }
-        
+       
+    
         private IQueryable<Article>? GetFavoritedArticles(string userId, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
+            Guard.Against.NullOrEmpty(userId, nameof(userId));
+            Guard.Against.Null(queryable, nameof(queryable));
+
             IQueryable<Article>? query;
             var user = GetArticleUserQueryable(userId);
 
@@ -161,12 +190,12 @@ namespace Zenith.Core.Features.Articles
 
         private ZenithUser? GetArticleUserQueryable(string userId)
         {
+            Guard.Against.NullOrEmpty(userId, nameof(userId));
             return _appDbContext.Users
                 .Include(u=> u.Followers)
                 .Include(u => u.Favorites)
                 .FirstOrDefault(u => u.Id == userId);
         }
-
         
         private async Task<int?> GetTagWithMostArticles()
         {
@@ -200,21 +229,13 @@ namespace Zenith.Core.Features.Articles
                 .Include(au => au.Comments);
         }
 
-        private static IQueryable<Article> SearchArticlesByTitle(SearchArticles.Query request, IIncludableQueryable<Article, ICollection<Comment>> queryable)
+     
+        private async Task<IQueryable<Article>> GetArticlesByTagName(ArticleSearchDto searchParameters, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
-            return queryable
-                .Where(q => q.Title.ToLowerInvariant().Contains(request.SearchText.ToLowerInvariant()));
-        }
+            Guard.Against.Null(searchParameters, nameof(searchParameters));
+            Guard.Against.NullOrEmpty(searchParameters.Tag, nameof(searchParameters.Tag));
 
-        private static IQueryable<Article> GetArticlesByAuthor(SearchArticles.Query request, IIncludableQueryable<Article, ICollection<Comment>> queryable)
-        {
-            return queryable
-                .Where(q => q.Author.UserName == request.Author);
-        }
-
-        private async Task<IQueryable<Article>> GetArticlesByTagName(SearchArticles.Query request, IIncludableQueryable<Article, ICollection<Comment>> queryable)
-        {
-            var tagId = await _appDbContext.Tags.Where(t => t.Name == request.Tag)
+            var tagId = await _appDbContext.Tags.Where(t => t.Name == searchParameters.Tag)
                 .Select(t => t.Id)
                 .FirstOrDefaultAsync();
 

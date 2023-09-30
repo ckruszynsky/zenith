@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
+using Zenith.Common.Extensions;
 using Zenith.Common.Mapping;
 using Zenith.Core.Domain.Entities;
 
@@ -44,6 +45,16 @@ namespace Zenith.Core.Features.Articles.Dtos
                 .ForMember(dest => dest.Author, opts => opts.MapFrom(source => source.Author))
                 .ForMember(dest => dest.Favorited, opts => opts.Ignore())
                 .ForMember(dest => dest.Following, opts => opts.Ignore());
+
+            profile.CreateMap<ArticleDto,Article>()
+                .ForMember(dest => dest.ArticleTags, opts => opts.Ignore())
+                .ForMember(dest => dest.AuthorId, opts => opts.Ignore())
+                .ForMember(dest => dest.Author, opts => opts.Ignore())
+                .ForMember(dest => dest.Created, opts => opts.Ignore())
+                .ForMember(dest => dest.LastModified, opts => opts.Ignore())
+                .ForMember(dest => dest.Slug, opts=> opts.MapFrom(source => source.Title.ToSlug()));
+
+
 
         }
     }
