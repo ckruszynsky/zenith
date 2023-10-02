@@ -15,5 +15,7 @@ namespace Zenith.Core.Features.Articles.Contracts
         Task<ArticleDto> CreateArticleAsync(CreateArticleDto newArticle, string userId, IEnumerable<TagDto> tags);
         
         Task<ArticleDto> UpdateArticleAsync(string slug, UpdateArticleDto updatedArticle,IEnumerable<TagDto>? tags, string userId);
+
+        Task<bool> DeleteArticleAsync(string slug, string userId);
     }
 }
