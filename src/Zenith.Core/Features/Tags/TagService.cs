@@ -23,6 +23,8 @@ namespace Zenith.Core.Features.Tags
         public async Task<IEnumerable<TagDto>> CreateTagsAsync(IEnumerable<string> tags)
         {
             var tagDtos = new List<TagDto>();
+            if (!tags.Any()) return tagDtos;
+
             foreach (var tagName in tags)
             {
                 var tag = _appDbContext.Tags.FirstOrDefault(x => x.Name == tagName);
