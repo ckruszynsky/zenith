@@ -5,6 +5,7 @@ namespace Zenith.Core.Features.Articles.Contracts
 {
     public interface IArticleService
     {
+        
         Task<ArticleListDto> GetArticleFeedAsync(ArticleFeedDto feedParameters, string userId);
 
         Task<ArticleListDto> SearchAsync(ArticleSearchDto searchParameters, string userId);
@@ -12,5 +13,7 @@ namespace Zenith.Core.Features.Articles.Contracts
         Task<ArticleDto?> GetArticleAsync(string slug, string userId);
 
         Task<ArticleDto> CreateArticleAsync(CreateArticleDto newArticle, string userId, IEnumerable<TagDto> tags);
+        
+        Task<ArticleDto> UpdateArticleAsync(string slug, UpdateArticleDto updatedArticle,IEnumerable<TagDto>? tags, string userId);
     }
 }

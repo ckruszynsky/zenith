@@ -125,7 +125,7 @@ namespace Zenith.Core.Features.Articles
             
             IQueryable<Article>? query = GetArticleQueryable();
             
-            var articleEntity = await query.FirstOrDefaultAsync(a => a.Slug == slug);
+            var articleEntity = await query.FirstOrDefaultAsync(a => string.Equals(a.Slug,slug,StringComparison.OrdinalIgnoreCase));
             var articleDto = _mapper.Map<ArticleDto>(articleEntity);
 
             if (articleEntity == null) return null;
@@ -136,6 +136,47 @@ namespace Zenith.Core.Features.Articles
 
             return articleDto;
 
+        }
+
+        public async Task<ArticleDto> UpdateArticleAsync(string slug, UpdateArticleDto updateArticleDto,IEnumerable<TagDto>? tags, string userId)
+        {
+            var query = GetArticleQueryable();
+            var articleToUpdate = await query
+                .FirstOrDefaultAsync(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase)
+                && a.AuthorId == userId);
+
+            if (articleToUpdate == null)
+            {
+                throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
+            }
+            
+            if (updateArticleDto.Title != articleToUpdate.Title)
+            {
+                articleToUpdate.Title = updateArticleDto.Title;
+                articleToUpdate.Slug = updateArticleDto.Title.ToSlug();
+            }
+
+            articleToUpdate.Description = updateArticleDto.Description;
+            articleToUpdate.Body = updateArticleDto.Body;
+
+            if(tags.Any())
+            {                
+                articleToUpdate.ArticleTags.Clear();
+                foreach (var tag in tags )
+                {               
+                    articleToUpdate.ArticleTags.Add(new ArticleTag
+                    {
+                        Article = articleToUpdate,
+                        TagId = tag.Id
+                    });
+                }
+            }
+
+
+            await _appDbContext.SaveChangesAsync();
+            
+            var articleDto = _mapper.Map<ArticleDto>(articleToUpdate);
+            return articleDto;
         }
 
         public async Task<ArticleDto> CreateArticleAsync(CreateArticleDto newArticle, string userId, IEnumerable<TagDto> tags)
@@ -172,8 +213,7 @@ namespace Zenith.Core.Features.Articles
 
             return articleDto;
         }
-       
-    
+           
         private IQueryable<Article>? GetFavoritedArticles(string userId, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
             Guard.Against.NullOrEmpty(userId, nameof(userId));
@@ -228,7 +268,6 @@ namespace Zenith.Core.Features.Articles
                 .ThenInclude(a => a.User)
                 .Include(au => au.Comments);
         }
-
      
         private async Task<IQueryable<Article>> GetArticlesByTagName(ArticleSearchDto searchParameters, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
