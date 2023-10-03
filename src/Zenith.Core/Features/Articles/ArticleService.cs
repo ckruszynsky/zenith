@@ -146,38 +146,38 @@ namespace Zenith.Core.Features.Articles
                 .FirstOrDefaultAsync(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase)
                 && a.AuthorId == userId);
 
-            if (articleToUpdate == null)
+            if (articleToUpdate != null)
             {
-                throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
-            }
-            
-            if (updateArticleDto.Title != articleToUpdate.Title)
-            {
-                articleToUpdate.Title = updateArticleDto.Title;
-                articleToUpdate.Slug = updateArticleDto.Title.ToSlug();
-            }
-
-            articleToUpdate.Description = updateArticleDto.Description;
-            articleToUpdate.Body = updateArticleDto.Body;
-
-            if(tags.Any())
-            {                
-                articleToUpdate.ArticleTags.Clear();
-                foreach (var tag in tags )
-                {               
-                    articleToUpdate.ArticleTags.Add(new ArticleTag
-                    {
-                        Article = articleToUpdate,
-                        TagId = tag.Id
-                    });
+                if (updateArticleDto.Title != articleToUpdate.Title)
+                {
+                    articleToUpdate.Title = updateArticleDto.Title;
+                    articleToUpdate.Slug = updateArticleDto.Title.ToSlug();
                 }
+
+                articleToUpdate.Description = updateArticleDto.Description;
+                articleToUpdate.Body = updateArticleDto.Body;
+
+                if (tags.Any())
+                {
+                    articleToUpdate.ArticleTags.Clear();
+                    foreach (var tag in tags)
+                    {
+                        articleToUpdate.ArticleTags.Add(new ArticleTag
+                        {
+                            Article = articleToUpdate,
+                            TagId = tag.Id
+                        });
+                    }
+                }
+
+
+                await _appDbContext.SaveChangesAsync();
+
+                var articleDto = _mapper.Map<ArticleDto>(articleToUpdate);
+                return articleDto;
             }
 
-
-            await _appDbContext.SaveChangesAsync();
-            
-            var articleDto = _mapper.Map<ArticleDto>(articleToUpdate);
-            return articleDto;
+            throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
         }
 
         public async Task<ArticleDto> CreateArticleAsync(CreateArticleDto newArticle, string userId, IEnumerable<TagDto> tags)
@@ -223,30 +223,23 @@ namespace Zenith.Core.Features.Articles
             var query = GetArticleQueryable();
             var articleToDelete = await query
                 .FirstOrDefaultAsync(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase)
-                                                         && a.AuthorId == userId);
-
-            if (articleToDelete == null)
-            {
-                throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
-            }
+                                                         && a.AuthorId == userId) 
+                ?? throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
 
             _appDbContext.Articles.Remove(articleToDelete);
             await _appDbContext.SaveChangesAsync();
 
             return true;
+
         }
 
         public async Task<bool> AddCommentAsync(string slug, AddCommentDto comment, string userId)
         {
                 var query = GetArticleQueryable();
                 var article = await query
-                    .FirstOrDefaultAsync(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase));
+                    .FirstOrDefaultAsync(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase))
+                    ?? throw new NotFoundException($"Article with slug {slug} not found");
                 
-                if(article == null)
-                {
-                    throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
-                }
-
                 var commentEntity = new Comment
                 {
                     Body = comment.Body,
@@ -263,25 +256,60 @@ namespace Zenith.Core.Features.Articles
         {
             var query = GetArticleQueryable();
             var article = query
-                .FirstOrDefault(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase));
-
-            if(article == null)
-            {
-                throw new NotFoundException($"Article with slug {slug} not found");
-            }
-
-            var comment = article.Comments.FirstOrDefault(c => c.Id == commentId);
-            if(comment == null)
-            {
-                throw new NotFoundException($"Comment with id {commentId} not found");
-            }
-
-            if(comment.UserId != userId)
+                .FirstOrDefault(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase))
+                ?? throw new NotFoundException($"Article with slug {slug} not found");
+            
+            var comment = article.Comments.FirstOrDefault(c => c.Id == commentId) ?? throw new NotFoundException($"Comment with id {commentId} not found");
+            if (comment.UserId != userId)
             {
                 throw new ForbiddenAccessException("You are not authorized to delete this comment");
             }
 
             article.Comments.Remove(comment);
+            await _appDbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> FavoriteArticleAsync(string slug, string userId)
+        {
+            var query = GetArticleQueryable();
+            var article = query
+                .FirstOrDefault(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase))
+                ?? throw new NotFoundException($"Article with slug {slug} not found");
+
+            var user = GetArticleUserQueryable(userId) ?? throw new NotFoundException($"User with id {userId} not found");
+            
+            if (article.IsArticleFavoritedByUser(user)) {
+                return true;
+            }
+
+            article.Favorites.Add(new Favorite
+            {
+                Article = article,
+                User = user
+            });
+
+            await _appDbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UnfavoriteArticleAsync(string slug, string userId)
+        {
+            var query = GetArticleQueryable();
+            var article = query
+                .FirstOrDefault(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase))
+                ?? throw new NotFoundException($"Article with slug {slug} not found");
+            
+            var user = GetArticleUserQueryable(userId) ?? throw new NotFoundException($"User with id {userId} not found");
+
+            if (!article.IsArticleFavoritedByUser(user))
+            {
+                return true;
+            }
+
+            var favorite = article.Favorites.FirstOrDefault(f => f.UserId == userId);
+            article.Favorites.Remove(favorite);
             await _appDbContext.SaveChangesAsync();
             return true;
         }
