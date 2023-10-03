@@ -21,5 +21,9 @@ namespace Zenith.Core.Features.Articles.Contracts
         Task<bool> AddCommentAsync(string slug, AddCommentDto comment, string userId);
 
         Task<bool> DeleteCommentAsync(string slug, int commentId, string userId);
+
+        Task<bool>FavoriteArticleAsync(string slug, string userId);
+
+        Task<bool>UnfavoriteArticleAsync(string slug, string userId);
     }
 }

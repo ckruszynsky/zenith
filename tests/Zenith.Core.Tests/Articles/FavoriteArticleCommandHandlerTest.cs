@@ -1,10 +1,11 @@
-﻿using System;
+﻿using FizzWare.NBuilder;
+using Microsoft.Extensions.Logging.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FizzWare.NBuilder;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using Zenith.Common.Extensions;
 using Zenith.Core.Domain.Entities;
@@ -13,18 +14,19 @@ using Zenith.Core.Tests.Infrastructure;
 
 namespace Zenith.Core.Tests.Articles
 {
-    public class GetArticleQueryHandlerTest:TestFixture
+    public class FavoriteArticleCommandHandlerTest:TestFixture
     {
-        private readonly NullLogger<GetArticle.Handler> _logger;
+        private readonly NullLogger<FavoriteArticle.Handler> _logger;
 
-        public GetArticleQueryHandlerTest()
+        public FavoriteArticleCommandHandlerTest()
         {
-            _logger = NullLogger<GetArticle.Handler>.Instance;
+            _logger = NullLogger<FavoriteArticle.Handler>.Instance;
         }
 
         [Fact]
-        public async Task GivenValidRequest_WhenArticleExists_ReturnsArticleViewModel()
+        public async Task GivenValidRequest_WhenArticleExists_ArticleIsFavorited()
         {
+            //arrange
             var expectedTitle = "Test Article";
 
             var userTestData = Builder<ZenithUser>
@@ -48,7 +50,7 @@ namespace Zenith.Core.Tests.Articles
 
             Context.Tags.AddRange(tagsTestData);
             await Context.SaveChangesAsync();
-            
+
             var articles = Builder<Article>
                 .CreateListOfSize(2)
                 .TheFirst(1)
@@ -68,29 +70,36 @@ namespace Zenith.Core.Tests.Articles
             Context.Articles.AddRange(articles);
             await Context.SaveChangesAsync();
 
-            var request = new GetArticle.Query(Slug:"test-article");
-            var handler = new GetArticle.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
-            var response = await handler.Handle(request, CancellationToken.None);
+            var article = await Context.Articles.FirstOrDefaultAsync(a => a.Slug == expectedTitle.ToSlug());
+            //act
+            var command = new FavoriteArticle.Command(article.Slug);
+            var handler = new FavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var result = await handler.Handle(command, CancellationToken.None);
 
-            response.Value.ShouldNotBeNull();
-            response.IsSuccess.ShouldBeTrue();
-            response.Value.Title.ShouldBe(expectedTitle);
-            response.Value.Following.ShouldBeFalse();
-            response.Value.Favorited.ShouldBeFalse();
+            //assert
+            result.IsSuccess.ShouldBeTrue();
+            var favorite = await Context.Favorites
+                .Include(f=> f.Article)
+                .Include(f=> f.User)
+                .FirstOrDefaultAsync(f => f.ArticleId == article.Id);
+
+            favorite.ShouldNotBeNull();
+            favorite.ArticleId.ShouldBe(article.Id);
+            favorite.User.UserName.ShouldBe(TestConstants.TestUserName);
         }
 
         [Fact]
-        public async Task GivenValidRequest_WhenArticleDoesNotExist_ReturnsErrorResult()
-        {            
-            var request = new GetArticle.Query(Slug: "test-article");
-            var handler = new GetArticle.Handler(ServiceMgr, Mapper, _logger, CurrentUserContext);
-            var response = await handler.Handle(request, CancellationToken.None);
+        public async Task GivenValidRequest_WhenArticleDoesntExist_ReturnErrorResult()
+        {
+            //arrange 
+            var command = new FavoriteArticle.Command("test-article");
 
-            response.Value.ShouldBeNull();
-            response.IsSuccess.ShouldBeFalse();
-            response.Errors.ShouldNotBeEmpty();
-            response.Errors.Count().ShouldBe(1);
-            response.Errors.First().ShouldBe("Article with slug test-article not found");
+            //act
+            var handler = new FavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            //assert
+            result.IsSuccess.ShouldBeFalse();
         }
     }
 }
