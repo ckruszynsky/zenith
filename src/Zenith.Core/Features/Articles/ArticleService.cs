@@ -11,6 +11,7 @@ using Zenith.Core.Features.Articles.Contracts;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Tags.Dtos;
 using Zenith.Core.Infrastructure.Persistence;
+using NotFoundException = Zenith.Common.Exceptions.NotFoundException;
 
 namespace Zenith.Core.Features.Articles
 {
@@ -257,6 +258,34 @@ namespace Zenith.Core.Features.Articles
                 await _appDbContext.SaveChangesAsync();
                 return true;          
         }
+
+        public async Task<bool> DeleteCommentAsync(string slug, int commentId, string userId)
+        {
+            var query = GetArticleQueryable();
+            var article = query
+                .FirstOrDefault(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase));
+
+            if(article == null)
+            {
+                throw new NotFoundException($"Article with slug {slug} not found");
+            }
+
+            var comment = article.Comments.FirstOrDefault(c => c.Id == commentId);
+            if(comment == null)
+            {
+                throw new NotFoundException($"Comment with id {commentId} not found");
+            }
+
+            if(comment.UserId != userId)
+            {
+                throw new ForbiddenAccessException("You are not authorized to delete this comment");
+            }
+
+            article.Comments.Remove(comment);
+            await _appDbContext.SaveChangesAsync();
+            return true;
+        }
+
         private IQueryable<Article>? GetFavoritedArticles(string userId, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
             Guard.Against.NullOrEmpty(userId, nameof(userId));

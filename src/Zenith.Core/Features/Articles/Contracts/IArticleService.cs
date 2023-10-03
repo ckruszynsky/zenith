@@ -19,5 +19,7 @@ namespace Zenith.Core.Features.Articles.Contracts
         Task<bool> DeleteArticleAsync(string slug, string userId);
 
         Task<bool> AddCommentAsync(string slug, AddCommentDto comment, string userId);
+
+        Task<bool> DeleteCommentAsync(string slug, int commentId, string userId);
     }
 }
