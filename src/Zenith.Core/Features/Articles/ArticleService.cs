@@ -257,7 +257,6 @@ namespace Zenith.Core.Features.Articles
                 await _appDbContext.SaveChangesAsync();
                 return true;          
         }
-
         private IQueryable<Article>? GetFavoritedArticles(string userId, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
             Guard.Against.NullOrEmpty(userId, nameof(userId));

@@ -74,7 +74,6 @@ namespace Zenith.Core.Tests.Articles
             //act
             var command = new DeleteArticle.Command(articles[0].Slug);
             var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext, Mapper, _logger);
-
             var response = await handler.Handle(command, default);
 
             //assert
@@ -146,7 +145,6 @@ namespace Zenith.Core.Tests.Articles
         [Fact]
         public async Task GivenTheRequestIsValid_WhenTheArticleDoesNotExist_ReturnsErrorResult()
         {
-
             //act
             var command = new DeleteArticle.Command("a-test-article");
             var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext, Mapper, _logger);

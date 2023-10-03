@@ -26,7 +26,7 @@ namespace Zenith.Core.Features.Articles
             }
         }
 
-        public class Handler : IRequestHandler<Command, Result>
+        public class Handler : IRequestHandler<Command,Result>
         {
             private readonly IServiceManager _serviceManager;
             private readonly ICurrentUserContext _currentUserContext;
@@ -47,7 +47,6 @@ namespace Zenith.Core.Features.Articles
                     var currentUser = await _currentUserContext.GetCurrentUserContext();
                     await _serviceManager.Articles.DeleteArticleAsync(request.Slug, currentUser.Id);
                     return Result.Success();
-
                 }
                 catch (Exception ex)
                 {
@@ -58,3 +57,4 @@ namespace Zenith.Core.Features.Articles
         }
     }
 }
+
