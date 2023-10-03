@@ -73,13 +73,19 @@ namespace Zenith.Core.Tests.Articles
 
             //act
             var command = new DeleteArticle.Command(articles[0].Slug);
-            var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext, Mapper, _logger);
+            var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext,_logger, Mediator);
             var response = await handler.Handle(command, default);
 
             //assert
             response.IsSuccess.ShouldBeTrue();
             Context.Articles.Count().ShouldBe(1);
             Context.Articles.FirstOrDefault(a => a.Slug == articles[0].Slug).ShouldBeNull();
+
+            var activityLog = Context.ActivityLogs.FirstOrDefault();
+            activityLog.ShouldNotBeNull();
+            activityLog.ActivityType.ShouldBe(ActivityType.ArticleDelete);
+            activityLog.TransactionId.ShouldBe(articles[0].Slug);
+            activityLog.TransactionType.ShouldBe(TransactionType.Article);
 
         }
 
@@ -133,7 +139,7 @@ namespace Zenith.Core.Tests.Articles
 
             //act
             var command = new DeleteArticle.Command(articles[0].Slug);
-            var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext, Mapper, _logger);
+            var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext,  _logger, Mediator);
 
             var response = await handler.Handle(command, default);
 
@@ -147,7 +153,7 @@ namespace Zenith.Core.Tests.Articles
         {
             //act
             var command = new DeleteArticle.Command("a-test-article");
-            var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext, Mapper, _logger);
+            var handler = new DeleteArticle.Handler(ServiceMgr, CurrentUserContext, _logger, Mediator);
 
             var response = await handler.Handle(command, default);
 

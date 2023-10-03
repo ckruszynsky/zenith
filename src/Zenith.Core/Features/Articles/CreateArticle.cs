@@ -9,6 +9,7 @@ using AutoMapper;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Articles.ViewModels;
 using Zenith.Core.Infrastructure.Identity;
@@ -37,13 +38,15 @@ namespace Zenith.Core.Features.Articles
             private readonly IMapper _mapper;
             private readonly ICurrentUserContext _currentUserContext;
             private readonly ILogger<Handler> _logger;
+            private readonly IMediator _mediator;
 
-            public Handler(IServiceManager serviceManager, IMapper mapper, ICurrentUserContext currentUserContext,  ILogger<Handler> logger)
+            public Handler(IServiceManager serviceManager, IMapper mapper, ICurrentUserContext currentUserContext,  ILogger<Handler> logger, IMediator mediator)
             {
                 _serviceManager = serviceManager;
                 _mapper = mapper;
                 _currentUserContext = currentUserContext;
                 _logger = logger;
+                _mediator = mediator;
             }
             
             public async Task<Result<ArticleViewModel>> Handle(Command request, CancellationToken cancellationToken)
@@ -54,6 +57,13 @@ namespace Zenith.Core.Features.Articles
                     var tags = await _serviceManager.Tags.CreateTagsAsync(request.NewArticle.TagList);
                     var articleDto = await _serviceManager.Articles.CreateArticleAsync(request.NewArticle, user.Id, tags);
                     var articleViewModel = _mapper.Map<ArticleViewModel>(articleDto);
+                    await _mediator.Publish(new ActivityLog.AddActivity.Notification(new ActivityLog.Dtos.AddActivityDto
+                    {
+                        ActivityType = ActivityType.ArticleCreate,                        
+                        TransactionType = TransactionType.Article,
+                        TransactionId = articleDto.Id.ToString()
+                    }), cancellationToken);
+
                     return Result<ArticleViewModel>.Success(articleViewModel);
                 }
                 catch (Exception e)

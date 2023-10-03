@@ -11,6 +11,7 @@ using static Zenith.Core.Features.Articles.CreateArticle;
 using Azure;
 using Shouldly;
 using Zenith.Common.Extensions;
+using Zenith.Core.Domain.Entities;
 
 namespace Zenith.Core.Tests.Articles
 {
@@ -36,7 +37,7 @@ namespace Zenith.Core.Tests.Articles
             };
 
             //act
-            var handler = new Handler(ServiceMgr, Mapper, CurrentUserContext, _logger);
+            var handler = new Handler(ServiceMgr, Mapper, CurrentUserContext, _logger, Mediator);
             var result = await handler.Handle(new Command(articleDto), CancellationToken.None);
 
             //assert
@@ -51,6 +52,12 @@ namespace Zenith.Core.Tests.Articles
             result.Value.FavoriteCount.ShouldBe(0);
             result.Value.Favorited.ShouldBeFalse();
             result.Value.Following.ShouldBeFalse();
+
+            var activityLog = Context.ActivityLogs.FirstOrDefault();
+            activityLog.ShouldNotBeNull();
+            activityLog.ActivityType.ShouldBe(ActivityType.ArticleCreate);
+            activityLog.TransactionId.ShouldBe(result.Value.Id.ToString());
+            activityLog.TransactionType.ShouldBe(TransactionType.Article);
         }
     }
 }

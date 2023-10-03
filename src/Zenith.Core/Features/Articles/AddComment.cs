@@ -9,6 +9,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.ServiceManger;
@@ -33,13 +34,15 @@ namespace Zenith.Core.Features.Articles
         {
             private readonly IServiceManager _serviceManager;            
             private readonly ICurrentUserContext _currentUserContext;
-            private readonly ILogger<AddComment.Handler> _logger;         
+            private readonly ILogger<AddComment.Handler> _logger;
+            private readonly IMediator _mediator;
 
-            public Handler(IServiceManager serviceManager,ICurrentUserContext currentUserContext, ILogger<AddComment.Handler> logger)
+            public Handler(IServiceManager serviceManager,ICurrentUserContext currentUserContext, ILogger<AddComment.Handler> logger, IMediator mediator)
             {
                 _serviceManager = serviceManager;                
                 _currentUserContext = currentUserContext;
                 _logger = logger;
+                _mediator = mediator;
             }
             
             public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
@@ -48,6 +51,13 @@ namespace Zenith.Core.Features.Articles
                 {
                     var user = await _currentUserContext.GetCurrentUserContext();
                     var result = await _serviceManager.Articles.AddCommentAsync(request.Slug, request.Comment, user.Id);
+
+                    await _mediator.Publish(new ActivityLog.AddActivity.Notification(new ActivityLog.Dtos.AddActivityDto
+                    {
+                        ActivityType = ActivityType.CommentCreate,
+                        TransactionType = TransactionType.Comment,
+                        TransactionId = $"{request.Slug}-{user.Id}"
+                    }), cancellationToken);
                     return Result.Success();
                 }
                 catch (Exception ex)

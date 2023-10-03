@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
+using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Users;
 using Zenith.Core.Tests.Infrastructure;
 
@@ -21,13 +22,21 @@ namespace Zenith.Core.Tests.Users
         {
             var command = new LoginUser.Command("test.user@gmail.com", "#passwordTest1!");
 
-            var handler = new LoginUser.Handler(UserManager, Context, TokenService, _logger, Mapper);
+            var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
             var response = await handler.Handle(command, CancellationToken.None);
 
             response.IsSuccess.ShouldBeTrue();
             response.Value.ShouldNotBeNull();
             response.Value.Email.ShouldBe(command.Email);
             response.Value.UserName.ShouldBe("test.user");
+
+            var activityLog = Context.ActivityLogs.FirstOrDefault();
+            activityLog.ShouldNotBeNull();
+            activityLog.ActivityType.ShouldBe(ActivityType.Login);
+            
+            var user = Context.Users.FirstOrDefault(u => u.UserName == "test.user");
+            activityLog.TransactionId.ShouldBe(user.Id);
+            activityLog.TransactionType.ShouldBe(TransactionType.ZenithUser);
         }
 
         [Fact]
@@ -35,7 +44,7 @@ namespace Zenith.Core.Tests.Users
         {
             var command = new LoginUser.Command("test.user3@gmail.com", "#passwordTest1!");
 
-            var handler = new LoginUser.Handler(UserManager, Context, TokenService, _logger, Mapper);
+            var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
             var response = await handler.Handle(command, CancellationToken.None);
 
             response.IsSuccess.ShouldBeFalse();
@@ -49,7 +58,7 @@ namespace Zenith.Core.Tests.Users
         {
             var command = new LoginUser.Command("test.user@gmail.com", "#passwordTest2!");
 
-            var handler = new LoginUser.Handler(UserManager, Context, TokenService, _logger, Mapper);
+            var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
             var response = await handler.Handle(command, CancellationToken.None);
 
             response.IsSuccess.ShouldBeFalse();

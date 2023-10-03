@@ -11,7 +11,7 @@ namespace Zenith.Core.Tests.Users
     [Collection("ZenithCollectionFixture")]
     public class UpdateUserCommandHandlerTest : TestFixture
     {
-        private ILogger<UpdateUser.Handler> _logger;
+        private readonly ILogger<UpdateUser.Handler> _logger;
 
         public UpdateUserCommandHandlerTest()
         {
@@ -31,7 +31,7 @@ namespace Zenith.Core.Tests.Users
 
             var originalUser = await UserManager.FindByEmailAsync(TestConstants.TestUserEmail);
 
-            var command = new UpdateUser.Handler(CurrentUserContext, Mapper, UserManager, Context, TokenService);
+            var command = new UpdateUser.Handler(CurrentUserContext, Mapper, UserManager, Context, TokenService, Mediator);
             var result = await command.Handle(updateUserCommand, CancellationToken.None);
 
             result.ShouldNotBeNull();
@@ -45,6 +45,11 @@ namespace Zenith.Core.Tests.Users
             result.Value.Token.ShouldNotBe(new CurrentUserContextTest(UserManager).GetCurrentUserToken());
             result.Value.Token.ShouldBe(new TokenServiceTest().CreateToken(originalUser));
 
+            var activityLog = Context.ActivityLogs.FirstOrDefault();
+            activityLog.ShouldNotBeNull();
+            activityLog.ActivityType.ShouldBe(ActivityType.UserUpdated);
+            activityLog.TransactionId.ShouldBe(originalUser.Id.ToString());
+            activityLog.TransactionType.ShouldBe(TransactionType.ZenithUser);
 
         }
 
@@ -65,7 +70,8 @@ namespace Zenith.Core.Tests.Users
                 Mapper,
                 UserManager,
                 Context,
-                TokenService
+                TokenService,
+                Mediator
                );
 
             var response = await command.Handle(updateUserCommand, CancellationToken.None);
@@ -93,7 +99,8 @@ namespace Zenith.Core.Tests.Users
                 Mapper,
                 UserManager,
                 Context,
-                TokenService
+                TokenService,
+                Mediator
                 );
 
             var response = await handler.Handle(updateUserCommand, CancellationToken.None);
@@ -135,7 +142,7 @@ namespace Zenith.Core.Tests.Users
                 Mapper,
                 UserManager,
                 Context,
-                TokenService);
+                TokenService, Mediator);
 
             var response = await command.Handle(updateUserCommand, CancellationToken.None);
 
@@ -168,7 +175,7 @@ namespace Zenith.Core.Tests.Users
                 Mapper,
                 UserManager,
                 Context,
-                TokenService);
+                TokenService, Mediator);
 
             var response = await command.Handle(updateUserCommand, CancellationToken.None);
 
@@ -188,7 +195,7 @@ namespace Zenith.Core.Tests.Users
                 Mapper,
                 UserManager,
                 Context,
-                TokenService);
+                TokenService, Mediator);
 
             var response = await handler.Handle(updateUserCommand, CancellationToken.None);
 

@@ -74,7 +74,7 @@ namespace Zenith.Core.Tests.Articles
             
             var comment = articles[0].Comments.FirstOrDefault();
             var command = new DeleteComment.Command(articles[0].Slug, comment.Id);
-            var handler = new DeleteComment.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var handler = new DeleteComment.Handler(ServiceMgr,CurrentUserContext,_logger, Mediator);
 
             //act
             var response = handler.Handle(command, default);
@@ -88,7 +88,7 @@ namespace Zenith.Core.Tests.Articles
         {
             //arrange
             var command = new DeleteComment.Command("test-article", 1);
-            var handler = new DeleteComment.Handler(ServiceMgr, CurrentUserContext, _logger);
+            var handler = new DeleteComment.Handler(ServiceMgr, CurrentUserContext, _logger, Mediator);
             
             //act
             var response = await handler.Handle(command, default);
@@ -147,7 +147,7 @@ namespace Zenith.Core.Tests.Articles
 
             var comment = articles[0].Comments.FirstOrDefault();
             var command = new DeleteComment.Command(articles[0].Slug, comment.Id);
-            var handler = new DeleteComment.Handler(ServiceMgr, CurrentUserContext, _logger);
+            var handler = new DeleteComment.Handler(ServiceMgr, CurrentUserContext, _logger, Mediator);
 
             //act   
             var response = await handler.Handle(command, default);

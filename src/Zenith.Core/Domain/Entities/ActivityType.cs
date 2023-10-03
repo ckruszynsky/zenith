@@ -18,7 +18,15 @@ namespace Zenith.Core.Domain.Entities
         ArticleDelete,
         [Description("User has favorited an article")]
         UserFavorite,
+        [Description("User has unfavorited an article")]
+        UserUnfavorite,
+        [Description("User has commented on an article")]
+        CommentCreate,
+        [Description("User has deleted a comment")]
+        CommentDelete,
         [Description("User has followed another user")]
-        UserFollow
+        UserFollow,
+        [Description("User has unfollowed another user")]
+        UserUnfollow
     }
 }
