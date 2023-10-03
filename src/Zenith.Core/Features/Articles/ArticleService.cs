@@ -214,6 +214,50 @@ namespace Zenith.Core.Features.Articles
             return articleDto;
         }
            
+        public async Task<bool> DeleteArticleAsync(string slug, string userId)
+        {
+            Guard.Against.NullOrEmpty(slug, nameof(slug));
+            Guard.Against.NullOrEmpty(userId, nameof(userId));
+
+            var query = GetArticleQueryable();
+            var articleToDelete = await query
+                .FirstOrDefaultAsync(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase)
+                                                         && a.AuthorId == userId);
+
+            if (articleToDelete == null)
+            {
+                throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
+            }
+
+            _appDbContext.Articles.Remove(articleToDelete);
+            await _appDbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> AddCommentAsync(string slug, AddCommentDto comment, string userId)
+        {
+                var query = GetArticleQueryable();
+                var article = await query
+                    .FirstOrDefaultAsync(a => string.Equals(a.Slug, slug, StringComparison.CurrentCultureIgnoreCase));
+                
+                if(article == null)
+                {
+                    throw new Common.Exceptions.NotFoundException($"Article with slug {slug} not found");
+                }
+
+                var commentEntity = new Comment
+                {
+                    Body = comment.Body,
+                    UserId = userId,
+                    ArticleId = article.Id
+                };
+
+                article.Comments.Add(commentEntity);
+                await _appDbContext.SaveChangesAsync();
+                return true;          
+        }
+
         private IQueryable<Article>? GetFavoritedArticles(string userId, IIncludableQueryable<Article, ICollection<Comment>> queryable)
         {
             Guard.Against.NullOrEmpty(userId, nameof(userId));
