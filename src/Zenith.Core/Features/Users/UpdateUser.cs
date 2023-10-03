@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
 
@@ -29,19 +30,22 @@ namespace Zenith.Core.Features.Users
             private readonly UserManager<ZenithUser> _userManager;
             private readonly AppDbContext _appDbContext;
             private readonly ITokenService _tokenService;
+            private readonly IMediator _mediator;
 
             public Handler(
                 ICurrentUserContext currentUserContext,
                 IMapper mapper,
                 UserManager<ZenithUser> userManager,
                 AppDbContext appDbContext,
-                ITokenService tokenService)
+                ITokenService tokenService,
+                IMediator mediator)
             {
                 _currentUserContext = currentUserContext;
                 _mapper = mapper;
                 _userManager = userManager;
                 _appDbContext = appDbContext;
                 _tokenService = tokenService;
+                _mediator = mediator;
             }
 
             public async Task<Result<UserViewModel>> Handle(Command request, CancellationToken cancellationToken)
@@ -93,6 +97,13 @@ namespace Zenith.Core.Features.Users
                 userViewModel.Token = issueNewToken ?
                     _tokenService.CreateToken(currentUser)
                     : _currentUserContext.GetCurrentUserToken();
+
+                await _mediator.Publish(new ActivityLog.AddActivity.Notification(new ActivityLog.Dtos.AddActivityDto
+                {
+                    ActivityType = ActivityType.UserUpdated,
+                    TransactionType = TransactionType.ZenithUser,
+                    TransactionId = currentUser.Id
+                }), cancellationToken);
 
                 return Result.Success(userViewModel);
             }

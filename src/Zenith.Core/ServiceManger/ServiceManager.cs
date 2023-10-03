@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Zenith.Core.Features.ActivityLog;
+using Zenith.Core.Features.ActivityLog.Contracts;
 using Zenith.Core.Features.Articles;
 using Zenith.Core.Features.Articles.Contracts;
 using Zenith.Core.Features.Tags;
@@ -13,6 +15,7 @@ namespace Zenith.Core.ServiceManger
         private readonly IMapper _mapper;
         private IArticleService? _articleService = null;
         private ITagService? _tagService = null;
+        private IActivityLogService? _activityLogService = null;
 
         public ServiceManager(AppDbContext appDbContext, IMapper mapper)
         {
@@ -38,6 +41,13 @@ namespace Zenith.Core.ServiceManger
             }
         }
 
+        public IActivityLogService ActivityLogs {
+            get
+            {
+                _activityLogService ??= new ActivityLogService(_appDbContext);
+                return _activityLogService;
+            }
+        }
 
         public Task SaveAsync()
         {

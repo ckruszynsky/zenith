@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
 
@@ -26,23 +27,23 @@ namespace Zenith.Core.Features.Users
         public class Handler : IRequestHandler<LoginUser.Command, Result<UserViewModel>>
         {
             private readonly UserManager<ZenithUser> _userManager;
-            private readonly AppDbContext _appDbContext;
             private readonly ITokenService _tokenService;
             private readonly ILogger<Handler> _logger;
             private readonly IMapper _mapper;
+            private readonly IMediator _mediator;
 
             public Handler(
                 UserManager<ZenithUser> userManager,
-                AppDbContext appDbContext,
                 ITokenService tokenService,
                 ILogger<LoginUser.Handler> logger,
-                IMapper mapper)
+                IMapper mapper,
+                IMediator mediator)
             {
-                _userManager = userManager;
-                _appDbContext = appDbContext;
+                _userManager = userManager;                
                 _tokenService = tokenService;
                 _logger = logger;
                 _mapper = mapper;
+                _mediator = mediator;
             }
 
             public async Task<Result<UserViewModel>> Handle(Command request, CancellationToken cancellationToken)
@@ -64,6 +65,13 @@ namespace Zenith.Core.Features.Users
                 user.Token = token;
 
                 _logger.LogInformation($"Login successful for user [{existingUser.Id} ({existingUser.Email}]");
+
+                await _mediator.Publish(new ActivityLog.AddActivity.Notification(new ActivityLog.Dtos.AddActivityDto
+                {
+                    ActivityType = ActivityType.Login,
+                    TransactionType = TransactionType.ZenithUser,
+                    TransactionId = existingUser.Id
+                }), cancellationToken);
                 return Result.Success(user);
             }
         }

@@ -73,7 +73,7 @@ namespace Zenith.Core.Tests.Articles
 
             //act
             var command = new AddComment.Command(articles[0].Slug, new AddCommentDto { Body = "Test Comment" });
-            var handler = new AddComment.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var handler = new AddComment.Handler(ServiceMgr,CurrentUserContext,_logger,Mediator);
 
             //assert
             var result = await handler.Handle(command, CancellationToken.None);
@@ -86,7 +86,7 @@ namespace Zenith.Core.Tests.Articles
             //arrange
             var newComment = new AddCommentDto { Body = "Test Comment" };
             var command = new AddComment.Command("test-article", newComment);
-            var handler = new AddComment.Handler(ServiceMgr, CurrentUserContext, _logger);
+            var handler = new AddComment.Handler(ServiceMgr, CurrentUserContext, _logger, Mediator);
             //act
             var result = await handler.Handle(command, CancellationToken.None);
             //assert

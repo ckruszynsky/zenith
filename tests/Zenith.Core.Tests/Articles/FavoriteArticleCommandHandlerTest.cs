@@ -73,7 +73,7 @@ namespace Zenith.Core.Tests.Articles
             var article = await Context.Articles.FirstOrDefaultAsync(a => a.Slug == expectedTitle.ToSlug());
             //act
             var command = new FavoriteArticle.Command(article.Slug);
-            var handler = new FavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var handler = new FavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger, Mediator);
             var result = await handler.Handle(command, CancellationToken.None);
 
             //assert
@@ -95,7 +95,7 @@ namespace Zenith.Core.Tests.Articles
             var command = new FavoriteArticle.Command("test-article");
 
             //act
-            var handler = new FavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var handler = new FavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger, Mediator);
             var result = await handler.Handle(command, CancellationToken.None);
 
             //assert

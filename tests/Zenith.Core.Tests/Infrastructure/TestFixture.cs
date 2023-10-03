@@ -13,6 +13,8 @@ using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
 using Zenith.Core.ServiceManger;
 using Zenith.Core.Tests.Factories;
+using MediatR;
+using Zenith.Core.Features.ActivityLog;
 
 namespace Zenith.Core.Tests.Infrastructure
 {
@@ -32,11 +34,13 @@ namespace Zenith.Core.Tests.Infrastructure
 
         protected IServiceManager ServiceMgr { get; }
 
+        protected IMediator Mediator { get; }
+
         public TestFixture()
         {
             var services = new ServiceCollection();
             services.AddEntityFrameworkInMemoryDatabase()
-                .AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase($"{Guid.NewGuid().ToString()}.db"));
+                .AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase($"{Guid.NewGuid()}.db"));
 
             services.AddIdentity<ZenithUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
@@ -50,6 +54,8 @@ namespace Zenith.Core.Tests.Infrastructure
             {
                 HttpContext = context
             });
+
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetAssembly(typeof(AddActivity.Notification))));
 
             services.AddScoped<IMapper>(provider => AutoMapperFactory.Create());
             
@@ -73,6 +79,7 @@ namespace Zenith.Core.Tests.Infrastructure
             UserManager = serviceProvider.GetRequiredService<UserManager<ZenithUser>>();
             CurrentUserContext = new CurrentUserContextTest(UserManager);
             ServiceMgr = serviceProvider.GetRequiredService<IServiceManager>();
+            Mediator = serviceProvider.GetRequiredService<IMediator>();
 
         }
 

@@ -74,7 +74,7 @@ namespace Zenith.Core.Tests.Articles
             
             //act
             var command = new UnfavoriteArticle.Command(articles[0].Slug);
-            var handler = new UnfavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var handler = new UnfavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger, Mediator);
             var result = await handler.Handle(command, CancellationToken.None);
             
             //assert
@@ -135,7 +135,7 @@ namespace Zenith.Core.Tests.Articles
 
             //act
             var command = new UnfavoriteArticle.Command(articles[0].Slug);
-            var handler = new UnfavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var handler = new UnfavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger, Mediator);
             var result = await handler.Handle(command, CancellationToken.None);
 
             //assert
@@ -152,7 +152,7 @@ namespace Zenith.Core.Tests.Articles
             var command = new UnfavoriteArticle.Command("test-article");
 
             //act
-            var handler = new UnfavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger);
+            var handler = new UnfavoriteArticle.Handler(ServiceMgr,CurrentUserContext,_logger,Mediator);
             var result = await handler.Handle(command, CancellationToken.None);
 
             //assert

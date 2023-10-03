@@ -9,6 +9,9 @@ namespace Zenith.Core.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<ActivityLog> builder)
         {
+            builder.Property(a => a.ActivityType)
+                .HasConversion(new EnumToStringConverter<ActivityType>());
+
             builder.Property(a => a.TransactionType)
                 .HasConversion(new EnumToStringConverter<TransactionType>());
         }

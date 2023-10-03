@@ -27,7 +27,7 @@ namespace Zenith.Core.Tests.Users
                 "#testPassword1!");
 
 
-            var command = new CreateUser.Handler(_logger, UserManager, Context, Mapper, TokenService);
+            var command = new CreateUser.Handler(_logger, UserManager,Mapper, TokenService, Mediator);
             var result = await command.Handle(createUserCommand, CancellationToken.None);
 
             result.ShouldNotBeNull();
@@ -37,6 +37,13 @@ namespace Zenith.Core.Tests.Users
             result.Value.UserName.ShouldBe(createUserCommand.Username);
             result.Value.Email.ShouldBe(createUserCommand.Email);
             Context.Users.Single(u => u.UserName == createUserCommand.Username).ShouldNotBeNull();
+
+            var activityLog = Context.ActivityLogs.FirstOrDefault();
+            activityLog.ShouldNotBeNull();  
+            activityLog.ActivityType.ShouldBe(ActivityType.UserCreated);            
+            var user = Context.Users.FirstOrDefault(u => u.UserName == createUserCommand.Username);
+            activityLog.TransactionId.ShouldBe(user.Id.ToString());
+            activityLog.TransactionType.ShouldBe(TransactionType.ZenithUser);
         }
 
 
@@ -64,7 +71,7 @@ namespace Zenith.Core.Tests.Users
 
             await UserManager.CreateAsync(existingUserWithSameUsername);
 
-            var command = new CreateUser.Handler(_logger, UserManager, Context, Mapper, TokenService);
+            var command = new CreateUser.Handler(_logger, UserManager, Mapper, TokenService, Mediator);
 
             var result = command.Handle(createUserCommand, CancellationToken.None);
 
@@ -97,7 +104,7 @@ namespace Zenith.Core.Tests.Users
 
             await UserManager.CreateAsync(existingUserWithSameUsername);
 
-            var command = new CreateUser.Handler(_logger, UserManager, Context, Mapper, TokenService);
+            var command = new CreateUser.Handler(_logger, UserManager, Mapper, TokenService, Mediator);
 
             var result = command.Handle(createUserCommand, CancellationToken.None);
 
