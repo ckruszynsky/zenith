@@ -17,12 +17,12 @@ namespace Zenith.Core.Features.Articles
     {
         public record Command(string Slug) : IRequest<Result>;
 
-        public class  Validation:AbstractValidator<Command>
+        public class Validation : AbstractValidator<Command>
         {
 
             public Validation()
             {
-                RuleFor (x => x.Slug).NotEmpty();
+                RuleFor(x => x.Slug).NotEmpty();
             }
         }
 
@@ -47,8 +47,8 @@ namespace Zenith.Core.Features.Articles
                     var currentUser = await _currentUserContext.GetCurrentUserContext();
                     await _serviceManager.Articles.DeleteArticleAsync(request.Slug, currentUser.Id);
                     return Result.Success();
-                    
-                }catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error occured while deleting article");
                     return Result.Error("Error occured while deleting article");
@@ -57,3 +57,4 @@ namespace Zenith.Core.Features.Articles
         }
     }
 }
+
