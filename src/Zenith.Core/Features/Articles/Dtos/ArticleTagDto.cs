@@ -14,7 +14,7 @@ namespace Zenith.Core.Features.Articles.Dtos
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public void Mapping(Profile profile)
+        public void Mapping(AutoMapper.Profile profile)
         {
             profile.CreateMap<ArticleTag, ArticleTagDto>()
                 .ForMember(dest => dest.Id, opts => opts.MapFrom(src => src.Tag.Id))

@@ -17,7 +17,7 @@ namespace Zenith.Core.Features.Articles.ViewModels
         public string Image { get; set; }
         public bool Following { get; set; }
 
-        public void Mapping(Profile profile)
+        public void Mapping(AutoMapper.Profile profile)
         {
             profile.CreateMap<ArticleAuthorDto, ArticleAuthorViewModel>()
                 .ForMember(dest => dest.UserName, opts => opts.MapFrom(source => source.UserName))

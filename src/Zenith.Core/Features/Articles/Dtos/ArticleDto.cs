@@ -37,7 +37,7 @@ namespace Zenith.Core.Features.Articles.Dtos
 
         public DateTime Updated { get; set; }
 
-        public void Mapping(Profile profile)
+        public void Mapping(AutoMapper.Profile profile)
         {
 
             profile.CreateMap<Article, ArticleDto>()

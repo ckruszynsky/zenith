@@ -22,7 +22,7 @@ namespace Zenith.Core.Features.Articles.Models
         public bool Favorited { get; set; }
         public bool Following { get; set; }
 
-        public void Mapping(Profile profile)
+        public void Mapping(AutoMapper.Profile profile)
         {
             profile.CreateMap<ArticleDto,ArticleFeedViewModel>()
                 .ForMember(dest => dest.Author, opts => opts.MapFrom(source => source.Author.UserName))
