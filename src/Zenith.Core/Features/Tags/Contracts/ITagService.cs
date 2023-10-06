@@ -9,6 +9,7 @@ namespace Zenith.Core.Features.Tags.Contracts
 {
     public interface ITagService
     {
+        Task<TagListDto> GetAllTagsAsync(int currentPage, int pageSize);
         Task<IEnumerable<TagDto>> CreateTagsAsync(IEnumerable<string> tags);
     }
 }
