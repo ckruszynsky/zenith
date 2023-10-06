@@ -38,6 +38,7 @@ namespace Zenith.Core.Tests.Infrastructure
 
         public TestFixture()
         {
+            
             var services = new ServiceCollection();
             services.AddEntityFrameworkInMemoryDatabase()
                 .AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase($"{Guid.NewGuid()}.db"));
@@ -48,7 +49,7 @@ namespace Zenith.Core.Tests.Infrastructure
             services.AddLogging();
 
             // Configure HTTP context for authentication
-            var context = new DefaultHttpContext();
+            var context = new DefaultHttpContext();            
             context.Features.Set<IHttpAuthenticationFeature>(new HttpAuthenticationFeature());
             services.AddSingleton<IHttpContextAccessor>(_ => new HttpContextAccessor
             {
@@ -59,7 +60,9 @@ namespace Zenith.Core.Tests.Infrastructure
 
             services.AddScoped<IMapper>(provider => AutoMapperFactory.Create());
             
-            services.AddScoped<IServiceManager, ServiceManager>();
+            services.AddScoped<ICurrentUserContext,CurrentUserContextTest>((sp) => new CurrentUserContextTest(sp.GetRequiredService<UserManager<ZenithUser>>()));
+            
+            services.AddScoped<IServiceManager,ServiceManager>();
 
             //configure current user accessor as provider
             var serviceProvider = services.BuildServiceProvider();
@@ -77,7 +80,7 @@ namespace Zenith.Core.Tests.Infrastructure
             TokenService = new TokenServiceTest();
             Context = databaseContext;
             UserManager = serviceProvider.GetRequiredService<UserManager<ZenithUser>>();
-            CurrentUserContext = new CurrentUserContextTest(UserManager);
+            CurrentUserContext =serviceProvider.GetRequiredService<ICurrentUserContext>();
             ServiceMgr = serviceProvider.GetRequiredService<IServiceManager>();
             Mediator = serviceProvider.GetRequiredService<IMediator>();
 

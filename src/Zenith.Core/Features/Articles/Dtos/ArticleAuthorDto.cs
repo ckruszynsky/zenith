@@ -18,7 +18,7 @@ namespace Zenith.Core.Features.Articles.Dtos
         public string? Image { get; set; }
         public bool Following { get; set; }
 
-        public void Mapping(Profile profile)
+        public void Mapping(AutoMapper.Profile profile)
         {
             profile.CreateMap<ZenithUser, ArticleAuthorDto>()
                 .ForMember(dest => dest.Id, opts => opts.MapFrom(source => source.Id))

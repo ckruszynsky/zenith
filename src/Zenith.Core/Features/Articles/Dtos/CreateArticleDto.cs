@@ -18,7 +18,7 @@ namespace Zenith.Core.Features.Articles.Dtos
 
         public IEnumerable<string> TagList { get; set; }
 
-        public void Mapping(Profile profile)
+        public void Mapping(AutoMapper.Profile profile)
         {
             profile.CreateMap<CreateArticleDto, Article>()
                 .ForMember(dest => dest.Title, opts => opts.MapFrom(src => src.Title))
