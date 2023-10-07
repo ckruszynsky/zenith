@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Zenith.Common.Date;
 using Zenith.Core.Infrastructure.Identity;
 
@@ -12,11 +13,10 @@ namespace Zenith.Core.Infrastructure.Persistence.Interceptors
         private readonly IDateTime _dateTime;
 
         public AuditableEntitySaveChangesInterceptor(
-            ICurrentUserContext currentUserService,
-            IDateTime dateTime)
+           IServiceProvider serviceProvider)
         {
-            _currentUserService = currentUserService;
-            _dateTime = dateTime;
+            _currentUserService = serviceProvider.GetRequiredService<ICurrentUserContext>();
+            _dateTime = serviceProvider.GetRequiredService<IDateTime>();
         }
 
         public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
