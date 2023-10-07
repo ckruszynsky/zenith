@@ -22,6 +22,7 @@ namespace Zenith.Core.Behaviors
 
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
+            if (!_isEnabled) return await next();
             try
             {
                 return await next();

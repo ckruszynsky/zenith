@@ -15,17 +15,17 @@ namespace Zenith.Core.Behaviors
     {
         private readonly Stopwatch _timer;
         private readonly ILogger<TRequest> _logger;
-        private readonly ICurrentUserContext _currentUserContext;        
         private readonly bool _isEnabled;
+        private readonly int _elapsedMillisecondsThreshold;
 
         public PerformanceTrackingBehavior(
-            ILogger<TRequest> logger,
-            ICurrentUserContext currentUserService,
+            ILogger<TRequest> logger,            
             IConfiguration configuration)
         {
             _timer = new Stopwatch();
             _logger = logger;
-            _isEnabled = Convert.ToBoolean(configuration["PipelineSettings:PerformanceTrackingBehavior"]);
+            _isEnabled = Convert.ToBoolean(configuration["PipelineSettings:PerformanceTrackingEnabled"]);
+            _elapsedMillisecondsThreshold = Convert.ToInt32(configuration["PipelineSettings:PerformanceTrackingThreshold"]);
         }
 
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
@@ -33,12 +33,12 @@ namespace Zenith.Core.Behaviors
             if (_isEnabled) 
             { 
                 _timer.Start();
-                var response = await next();
+                    await next();
                 _timer.Stop();
 
                 var elapsedMilliseconds = _timer.ElapsedMilliseconds;
 
-                if (elapsedMilliseconds > 500)
+                if (elapsedMilliseconds > _elapsedMillisecondsThreshold)
                 {
                     var requestName = typeof(TRequest).Name;               
                     

@@ -12,7 +12,7 @@ namespace Zenith.Core.Features.Users
         public string Bio { get; set; }
         public string Image { get; set; }
 
-        private void Mapping(AutoMapper.Profile profile)
+        public void Mapping(AutoMapper.Profile profile)
         {
             profile.CreateMap<ZenithUser, UserViewModel>()
                 .ForMember(u => u.UserName, m => m.MapFrom(u => u.UserName))
