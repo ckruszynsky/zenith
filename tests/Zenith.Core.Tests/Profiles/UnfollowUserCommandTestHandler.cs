@@ -32,11 +32,11 @@ public class UnfollowUserCommandHandlerTest : TestFixture
 
         
 
-        var currentUser = CurrentUserContext.GetCurrentUserContext();
+        var currentUser = await CurrentUserContext.GetCurrentUserContext();
 
         testUser.Followers.Add(new UserFollow
         {
-            UserFollower = currentUser.Result
+            UserFollower = currentUser
         });
 
         await Context.SaveChangesAsync();
@@ -64,7 +64,7 @@ public class UnfollowUserCommandHandlerTest : TestFixture
     {
         //arrange
 
-        var currentUser = CurrentUserContext.GetCurrentUserContext();
+        var currentUser = await CurrentUserContext.GetCurrentUserContext();
 
         //act
         var command = new UnfollowUser.Command("missingUserName");
@@ -82,10 +82,10 @@ public class UnfollowUserCommandHandlerTest : TestFixture
     {
         //arrange
 
-        var currentUser = CurrentUserContext.GetCurrentUserContext();
+        var currentUser = await CurrentUserContext.GetCurrentUserContext();
 
         //act
-        var command = new UnfollowUser.Command(currentUser.Result.UserName);
+        var command = new UnfollowUser.Command(currentUser.UserName);
         var handler = new UnfollowUser.Handler(Mapper, ServiceMgr, _logger, Mediator);
         var result = await handler.Handle(command, CancellationToken.None);
 

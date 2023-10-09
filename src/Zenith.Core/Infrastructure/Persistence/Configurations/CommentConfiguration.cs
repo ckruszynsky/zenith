@@ -11,6 +11,12 @@ namespace Zenith.Core.Infrastructure.Persistence.Configurations
             builder.HasOne(c => c.Article)
                 .WithMany(a => a.Comments)
                 .HasForeignKey(c => c.ArticleId);
+
+            builder.HasOne(c=> c.User)                
+               .WithMany(u => u.Comments)
+               .HasForeignKey(c => c.UserId)
+               .OnDelete(DeleteBehavior.NoAction);
+                
         }
     }
 }

@@ -12,9 +12,6 @@ namespace Zenith.Core.Infrastructure.Persistence.Configurations
                 .WithOne(a => a.Author)
                 .HasForeignKey(cu => cu.AuthorId);
 
-            builder.Property(cu => cu.Bio)
-                .HasDefaultValue();
-
             builder.Property(cu => cu.Email)
                 .IsRequired();
         }

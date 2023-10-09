@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +12,8 @@ using Zenith.Core.Infrastructure.Persistence;
 using Zenith.Core.ServiceManger;
 using Zenith.Core.Tests.Factories;
 using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features.Authentication;
 using Zenith.Core.Features.ActivityLog;
 
 namespace Zenith.Core.Tests.Infrastructure
@@ -43,7 +43,8 @@ namespace Zenith.Core.Tests.Infrastructure
             services.AddEntityFrameworkInMemoryDatabase()
                 .AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase($"{Guid.NewGuid()}.db"));
 
-            services.AddIdentity<ZenithUser, IdentityRole>()
+            services.AddIdentityCore<ZenithUser>()
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>();
 
             services.AddLogging();

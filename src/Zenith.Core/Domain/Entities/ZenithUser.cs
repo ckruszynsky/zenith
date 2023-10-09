@@ -12,16 +12,19 @@ namespace Zenith.Core.Domain.Entities
             Articles = new List<Article>();
         }
 
-        public string? Bio { get; set; }
+        public string? Bio { get; set; } = null;
 
         public string? Image { get; set; }
 
-        public ICollection<UserFollow> Followers { get; }
+        public virtual ICollection<UserFollow> Followers { get; }
 
-        public ICollection<UserFollow> Following { get; }
+        public virtual ICollection<UserFollow> Following { get; }
 
-        public ICollection<Favorite> Favorites { get; }
+        public virtual ICollection<Favorite> Favorites { get; }
 
-        public ICollection<Article> Articles { get; }
+        public virtual ICollection<Article> Articles { get; }
+
+        public virtual ICollection<Comment> Comments { get; }
+       
     }
 }

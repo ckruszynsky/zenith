@@ -8,21 +8,23 @@ namespace Zenith.Core.Infrastructure.Persistence.Infrastructure
     public abstract class DesignTimeDbContextFactoryBase<TContext> : IDesignTimeDbContextFactory<TContext>
         where TContext : DbContext
     {
-        private const string ConnectionStringName = "CONNECTION_STRING";
+        private const string ConnectionStringName = "Data";
 
         public TContext CreateDbContext(string[] args)
         {
             var configuration = new ConfigurationBuilder()
+                
                 .AddUserSecrets<DesignTimeDbContextFactoryBase<TContext>>()
                 .AddEnvironmentVariables()
+                .AddJsonFile("appsettings.json")
                 .Build();
 
-            var connectionString = configuration[ConnectionStringName];
-
+            var connectionString = configuration.GetConnectionString("Data");
+            
             Guard.Against.NullOrEmpty(connectionString);
 
             var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseSqlServer(connectionString, builder => builder.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
 
             return CreateNewInstance(optionsBuilder.Options);
         }

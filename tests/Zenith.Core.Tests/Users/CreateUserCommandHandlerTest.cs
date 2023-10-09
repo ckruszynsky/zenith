@@ -73,11 +73,11 @@ namespace Zenith.Core.Tests.Users
 
             var command = new CreateUser.Handler(_logger, UserManager, Mapper, TokenService, Mediator);
 
-            var result = command.Handle(createUserCommand, CancellationToken.None);
+            var response = await command.Handle(createUserCommand, CancellationToken.None);
 
-            result.Result.IsSuccess.ShouldBeFalse();
-            result.Result.Errors.ShouldNotBeEmpty();
-            result.Result.Errors.ShouldContain($"Email {createUserCommand.Email} is already in use");
+            response.IsSuccess.ShouldBeFalse();
+            response.Errors.ShouldNotBeEmpty();
+            response.Errors.ShouldContain($"Email {createUserCommand.Email} is already in use");
         }
 
         [Fact]
@@ -106,11 +106,11 @@ namespace Zenith.Core.Tests.Users
 
             var command = new CreateUser.Handler(_logger, UserManager, Mapper, TokenService, Mediator);
 
-            var result = command.Handle(createUserCommand, CancellationToken.None);
+            var result = await command.Handle(createUserCommand, CancellationToken.None);
 
-            result.Result.IsSuccess.ShouldBeFalse();
-            result.Result.Errors.ShouldNotBeEmpty();
-            result.Result.Errors.ShouldContain($"Username {createUserCommand.Username} is already in use");
+            result.IsSuccess.ShouldBeFalse();
+            result.Errors.ShouldNotBeEmpty();
+            result.Errors.ShouldContain($"Username {createUserCommand.Username} is already in use");
         }
     }
 }
