@@ -14,7 +14,8 @@ namespace Zenith.Core.Infrastructure.Persistence.Configurations
 
             builder.HasOne(f => f.User)
                 .WithMany(u => u.Favorites)
-                .HasForeignKey(f => f.UserId);
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

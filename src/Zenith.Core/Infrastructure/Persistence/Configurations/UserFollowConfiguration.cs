@@ -10,11 +10,13 @@ namespace Zenith.Core.Infrastructure.Persistence.Configurations
         {
             builder.HasOne(uf => uf.UserFollower)
                 .WithMany(uf => uf.Following)
-                .HasForeignKey(uf => uf.UserFollowerId);
+                .HasForeignKey(uf => uf.UserFollowerId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(uf => uf.UserFollowing)
                 .WithMany(uf => uf.Followers)
-                .HasForeignKey(uf => uf.UserFollowingId);
+                .HasForeignKey(uf => uf.UserFollowingId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

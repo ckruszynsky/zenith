@@ -34,7 +34,7 @@ namespace Zenith.Core.Tests.Profiles
             Context.Users.Add(testUser);
             await Context.SaveChangesAsync();
 
-            var currentUser = CurrentUserContext.GetCurrentUserContext();
+            var currentUser = await CurrentUserContext.GetCurrentUserContext();
 
             //act
             var command = new FollowUser.Command(testUser.UserName);
@@ -49,7 +49,7 @@ namespace Zenith.Core.Tests.Profiles
                 .FirstOrDefault(u => u.UserName == testUser.UserName);
 
             user.Followers.Count.ShouldBe(1);
-            user.Followers.First().UserFollower.UserName.ShouldBe(currentUser.Result.UserName);
+            user.Followers.First().UserFollower.UserName.ShouldBe(currentUser.UserName);
 
         }
 
@@ -58,7 +58,7 @@ namespace Zenith.Core.Tests.Profiles
         {
             //arrange
 
-            var currentUser = CurrentUserContext.GetCurrentUserContext();
+            var currentUser = await CurrentUserContext.GetCurrentUserContext();
 
             //act
             var command = new FollowUser.Command("missingUserName");
@@ -76,10 +76,10 @@ namespace Zenith.Core.Tests.Profiles
         {
             //arrange
 
-            var currentUser = CurrentUserContext.GetCurrentUserContext();
+            var currentUser = await CurrentUserContext.GetCurrentUserContext();
 
             //act
-            var command = new FollowUser.Command(currentUser.Result.UserName);
+            var command = new FollowUser.Command(currentUser.UserName);
             var handler = new FollowUser.Handler(Mapper, ServiceMgr, _logger, Mediator);
             var result = await handler.Handle(command, CancellationToken.None);
 
