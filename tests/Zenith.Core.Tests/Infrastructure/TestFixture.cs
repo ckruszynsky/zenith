@@ -15,6 +15,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features.Authentication;
 using Zenith.Core.Features.ActivityLog;
+using Zenith.Core.Infrastructure;
 
 namespace Zenith.Core.Tests.Infrastructure
 {

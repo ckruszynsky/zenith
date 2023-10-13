@@ -1,37 +1,37 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Zenith.Common.Exceptions;
 using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Users.Dtos;
 using Zenith.Core.Infrastructure.Identity;
+using Zenith.Core.Infrastructure.Persistence;
 
 namespace Zenith.API
 {
     public class CurrentUserContext: ICurrentUserContext
     {
         private readonly IHttpContextAccessor _contextAccessor;
-        private readonly UserManager<ZenithUser> _userManager;
         private readonly ILogger<CurrentUserContext> _logger;
 
-        public CurrentUserContext(IHttpContextAccessor contextAccessor, UserManager<ZenithUser> userManager, ILogger<CurrentUserContext> logger)
+        public CurrentUserContext(IHttpContextAccessor contextAccessor, ILogger<CurrentUserContext> logger)
         {
-            _contextAccessor = contextAccessor;
-            _userManager = userManager;
+            _contextAccessor = contextAccessor;            
             _logger = logger;
         }
 
-        public async Task<ZenithUser> GetCurrentUserContext()
+        public HttpContextUserDto GetCurrentUserContext()
         {
             var currentHttpContext = _contextAccessor.HttpContext;
 
             if (currentHttpContext?.User != null)
             {
-                var currentUser = await _userManager.GetUserAsync(currentHttpContext.User);
-                if (currentUser != null) return currentUser;
-
-                _logger.LogError("User was not found in the user manager.");
-                throw new NotFoundException("User was not found");
+               return new HttpContextUserDto
+               {
+                   Id = currentHttpContext.User.FindFirstValue(ClaimTypes.Name) ?? string.Empty,
+                   UserName = currentHttpContext.User.FindFirstValue(ClaimTypes.UserData) ?? string.Empty,
+               };
             }
-
-
             _logger.LogError("User was not found on the current context");
             throw new NotFoundException("User was not found");
 
@@ -41,7 +41,7 @@ namespace Zenith.API
         {            
             if(_contextAccessor.HttpContext?.Request.Headers != null) {                
                 var authorizationHeader = _contextAccessor.HttpContext.Request.Headers?["Authorization"];
-                if (authorizationHeader.HasValue && authorizationHeader.ToString().StartsWith("Token ", StringComparison.OrdinalIgnoreCase))
+                if (authorizationHeader.HasValue && authorizationHeader.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
                     string token = authorizationHeader.ToString().Split(' ')[1];
                     return token;

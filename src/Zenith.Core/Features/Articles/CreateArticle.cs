@@ -53,7 +53,7 @@ namespace Zenith.Core.Features.Articles
             {
                 try { 
                     Guard.Against.Null(request.NewArticle, nameof(request.NewArticle));                    
-                    var user = await _currentUserContext.GetCurrentUserContext();
+                    var user =  _currentUserContext.GetCurrentUserContext();
                     var tags = await _serviceManager.Tags.CreateTagsAsync(request.NewArticle.TagList);
                     var articleDto = await _serviceManager.Articles.CreateArticleAsync(request.NewArticle, user.Id, tags);
                     var articleViewModel = _mapper.Map<ArticleViewModel>(articleDto);

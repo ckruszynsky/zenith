@@ -1,11 +1,14 @@
-﻿using Ardalis.Result;
+﻿using System.Security.Claims;
+using Ardalis.Result;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
+using Zenith.Core.Features.Users.Dtos;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
 
@@ -13,13 +16,13 @@ namespace Zenith.Core.Features.Users
 {
     public class UpdateUser
     {
-        public record Command(string? Email = "", string? Username = "", string? Image = "", string? Bio = "", string? Password = "") : IRequest<Result<UserViewModel>>;
+        public record Command(UpdateUserDto UpdateUserDto) : IRequest<Result<UserViewModel>>;
 
         public class Validator : AbstractValidator<Command>
         {
             public Validator()
             {
-                RuleFor(u => u.Email).EmailAddress();
+                RuleFor(u => u.UpdateUserDto.Email).EmailAddress();
             }
         }
 
@@ -52,43 +55,44 @@ namespace Zenith.Core.Features.Users
             {
                 var issueNewToken = false; //initialize flag to retrieve a new token on password reset
 
-                var currentUser = await _currentUserContext.GetCurrentUserContext();
-
-                if (IsRequestPropertyAvailableForUpdate(request.Email, currentUser.Email))
+                var claimsPrincipal = _currentUserContext.GetCurrentUserContext();
+                var currentUser = _appDbContext.Users.Single(u => u.UserName == claimsPrincipal.UserName);
+                var updateUserDto = request.UpdateUserDto;
+                if (IsRequestPropertyAvailableForUpdate(updateUserDto.Email, currentUser.Email))
                 {
-                    var priorExistingEmail = await _userManager.FindByEmailAsync(request.Email);
+                    var priorExistingEmail = await _userManager.FindByEmailAsync(updateUserDto.Email);
                     if (priorExistingEmail != null)
                     {
-                        return Result.Error($"Email {request.Email} is already in use");
+                        return Result.Error($"Email {updateUserDto.Email} is already in use");
                     }
 
                     issueNewToken = true; //flip flag for the new email
                 }
 
-                if (IsRequestPropertyAvailableForUpdate(request.Username, currentUser.UserName))
+                if (IsRequestPropertyAvailableForUpdate(updateUserDto.Username, currentUser.UserName))
                 {
-                    var priorExistingUsername = await _userManager.FindByNameAsync(request.Username);
+                    var priorExistingUsername = await _userManager.FindByNameAsync(updateUserDto.Username);
                     if (priorExistingUsername != null)
                     {
-                        return Result.Error($"Username {request.Username} is already in use");
+                        return Result.Error($"Username {updateUserDto.Username} is already in use");
                     }
                     // Flip the issue token flag for the new username
                     issueNewToken = true;
                 }
 
-                if (!string.IsNullOrWhiteSpace(request.Password))
+                if (!string.IsNullOrWhiteSpace(updateUserDto.Password))
                 {
                     await _userManager.RemovePasswordAsync(currentUser);
                     var userStore = new UserStore<ZenithUser>(_appDbContext);
                     await userStore.SetPasswordHashAsync(
                         currentUser,
-                        new PasswordHasher<ZenithUser>().HashPassword(currentUser, request.Password), CancellationToken.None);
+                        new PasswordHasher<ZenithUser>().HashPassword(currentUser, updateUserDto.Password), CancellationToken.None);
                 }
 
-                currentUser.Email = string.IsNullOrEmpty(request.Email) ? currentUser.Email : request.Email;
-                currentUser.UserName = string.IsNullOrEmpty(request.Username) ? currentUser.UserName : request.Username;
-                currentUser.Bio = request.Bio ?? currentUser.Bio;
-                currentUser.Image = request.Image ?? currentUser.Image;
+                currentUser.Email = string.IsNullOrEmpty(updateUserDto.Email) ? currentUser.Email : updateUserDto.Email;
+                currentUser.UserName = string.IsNullOrEmpty(updateUserDto.Username) ? currentUser.UserName : updateUserDto.Username;
+                currentUser.Bio = updateUserDto.Bio ?? currentUser.Bio;
+                currentUser.Image = updateUserDto.Image ?? currentUser.Image;
 
                 await _userManager.UpdateAsync(currentUser);
 

@@ -4,6 +4,10 @@ namespace Zenith.Core.Domain.Entities
 {
     public enum ActivityType
     {
+        [Description("User Logged In")]
+        UserLogin,
+        [Description("User Logged Out")]
+        UserLogout,
         [Description("User has been created")]
         UserCreated,
         [Description("User has been retrieved")]

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Ardalis.Result.AspNetCore;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Zenith.Core.Features.Users;
@@ -12,7 +13,7 @@ namespace Zenith.API.Configuration
         {
             services.AddFluentValidationAutoValidation();
 
-            services.AddControllers()             
+            services.AddControllers()   
                 .AddJsonOptions(options=>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());                    

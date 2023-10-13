@@ -1,26 +1,31 @@
 using HealthChecks.UI.Client;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Zenith.API.Configuration;
-
+using Zenith.Core.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
+builder.Services.AddCoreServices();
 builder.Services.AddHealthCheckConfiguration(builder.Configuration);
 builder.Services.AddEFConfiguration(builder.Configuration);
 builder.Services.AddIdentityConfiguration(builder.Configuration);
+builder.Services.AddJWTAuthConfiguration(builder.Configuration);
 builder.Services.AddAutoMapperConfiguration();
 builder.Services.AddMediatRConfiguration();
-builder.Services.AddCoreServices();
+
 
 
 builder.Services.AddControllerConfiguration();
-builder.Services.AddSwaggerConfiguration(builder.Configuration);
+builder.Services.AddSwaggerJWTConfiguration(builder.Configuration);
 builder.Services.AddSerilog();
+
+builder.Services.AddTransient<UserManager<ZenithUser>>();
 
 builder.Services.AddApplicationInsightsTelemetry(options =>
 {
@@ -64,7 +69,7 @@ app.UseSwaggerUI(options =>
         "/swagger/v1/swagger.json",
         $"Zenith API version {builder.Configuration["API:Version"]}"));
 
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

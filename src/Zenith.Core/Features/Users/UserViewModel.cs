@@ -14,6 +14,12 @@ namespace Zenith.Core.Features.Users
 
         public void Mapping(AutoMapper.Profile profile)
         {
+            profile.CreateMap<UserViewModel,ZenithUser>()
+                .ForMember(u => u.UserName, m => m.MapFrom(u => u.UserName))
+                .ForMember(u => u.Email, m => m.MapFrom(u => u.Email))
+                .ForMember(u => u.Bio, m => m.MapFrom(u => u.Bio))
+                .ForMember(u => u.Image, m => m.MapFrom(u => u.Image));
+
             profile.CreateMap<ZenithUser, UserViewModel>()
                 .ForMember(u => u.UserName, m => m.MapFrom(u => u.UserName))
                 .ForMember(u => u.Email, m => m.MapFrom(u => u.Email));

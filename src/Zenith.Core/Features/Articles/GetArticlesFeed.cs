@@ -37,7 +37,7 @@ namespace Zenith.Core.Features.Articles
                 try { 
                     Guard.Against.Null(request.FeedParameters, nameof(request.FeedParameters));
 
-                    var user = await _currentUserContext.GetCurrentUserContext();
+                    var user = _currentUserContext.GetCurrentUserContext();
                     var articleListDto =
                         await _serviceManager.Articles.GetArticleFeedAsync(request.FeedParameters, user.Id);
 

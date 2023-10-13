@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Users.Dtos;
 using Zenith.Core.Infrastructure.Identity;
 
 namespace Zenith.Core.Tests.Infrastructure
@@ -13,9 +15,14 @@ namespace Zenith.Core.Tests.Infrastructure
             _userManager = userManager;
         }
 
-        public async Task<ZenithUser> GetCurrentUserContext()
+        public HttpContextUserDto GetCurrentUserContext()
         {
-            return await _userManager.FindByEmailAsync(TestConstants.TestUserEmail);
+            var user = _userManager.Users.First(u=> u.UserName == TestConstants.TestUserName);
+            return new HttpContextUserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+            };
         }
 
         public string GetCurrentUserToken()

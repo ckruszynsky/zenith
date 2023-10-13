@@ -21,10 +21,13 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenValidUserCommand_WhenUserNameAndEmailAreUnique_ShouldReturnSuccess()
         {
-            var createUserCommand = new CreateUser.Command(
-                "aTestUserName",
-                "aTestEmail@gmail.com",
-                "#testPassword1!");
+            var createUserCommand = new CreateUser.Command(new Features.Users.Dtos.CreateUserDto
+            {
+                Email = "aTestEmail@gmail.com",
+                Username = "aTestUserName",
+                Password = "#testPassword1!"
+            });
+             
 
 
             var command = new CreateUser.Handler(_logger, UserManager,Mapper, TokenService, Mediator);
@@ -34,14 +37,14 @@ namespace Zenith.Core.Tests.Users
             result.IsSuccess.ShouldBeTrue();
             result.Value.ShouldNotBeNull();
             result.Value.ShouldBeOfType<UserViewModel>();
-            result.Value.UserName.ShouldBe(createUserCommand.Username);
-            result.Value.Email.ShouldBe(createUserCommand.Email);
-            Context.Users.Single(u => u.UserName == createUserCommand.Username).ShouldNotBeNull();
+            result.Value.UserName.ShouldBe(createUserCommand.CreateUserDto.Username);
+            result.Value.Email.ShouldBe(createUserCommand.CreateUserDto.Email);
+            Context.Users.Single(u => u.UserName == createUserCommand.CreateUserDto.Username).ShouldNotBeNull();
 
             var activityLog = Context.ActivityLogs.FirstOrDefault();
             activityLog.ShouldNotBeNull();  
             activityLog.ActivityType.ShouldBe(ActivityType.UserCreated);            
-            var user = Context.Users.FirstOrDefault(u => u.UserName == createUserCommand.Username);
+            var user = Context.Users.FirstOrDefault(u => u.UserName == createUserCommand.CreateUserDto.Username);
             activityLog.TransactionId.ShouldBe(user.Id.ToString());
             activityLog.TransactionType.ShouldBe(TransactionType.ZenithUser);
         }
@@ -50,17 +53,17 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenRequestContainsExistingEmail_WhenUserAlreadyExists_ReturnsError()
         {
-            var createUserCommand = new CreateUser.Command
-            (
-                "testEmail@gmail.com",
-                "testUsername1",
-                "#testPassword1!"
-            );
+            var createUserCommand = new CreateUser.Command(new Features.Users.Dtos.CreateUserDto
+            {
+                Email = "aTestEmail@gmail.com",
+                Username = "aTestUserName",
+                Password = "#testPassword1!"
+            });
 
             var existingUserWithSameUsername = new ZenithUser
             {
-                Email = createUserCommand.Email,
-                NormalizedEmail = createUserCommand.Email.ToUpperInvariant(),
+                Email = createUserCommand.CreateUserDto.Email,
+                NormalizedEmail = createUserCommand.CreateUserDto.Email.ToUpperInvariant(),
                 UserName = "testUserName12",
                 NormalizedUserName = "testUserName12".ToLowerInvariant(),
                 SecurityStamp = "someRandomSecurityStamp"
@@ -77,25 +80,25 @@ namespace Zenith.Core.Tests.Users
 
             response.IsSuccess.ShouldBeFalse();
             response.Errors.ShouldNotBeEmpty();
-            response.Errors.ShouldContain($"Email {createUserCommand.Email} is already in use");
+            response.Errors.ShouldContain($"Email {createUserCommand.CreateUserDto.Email} is already in use");
         }
 
         [Fact]
         public async Task GivenRequestContainsExistingUsername_WhenUserAlreadyExists_ReturnsError()
         {
-            var createUserCommand = new CreateUser.Command
-            (
-                "testEmail@gmail.com",
-                "testUsername1",
-                "#testPassword1!"
-            );
+            var createUserCommand = new CreateUser.Command(new Features.Users.Dtos.CreateUserDto
+            {
+                Email = "aTestEmail@gmail.com",
+                Username = "aTestUserName",
+                Password = "#testPassword1!"
+            });
 
             var existingUserWithSameUsername = new ZenithUser
             {
                 Email = "testEmail1@gmail.com",
                 NormalizedEmail = "testEmail1@gmail.com".ToUpperInvariant(),
-                UserName = createUserCommand.Username,
-                NormalizedUserName = createUserCommand.Username.ToLowerInvariant(),
+                UserName = createUserCommand.CreateUserDto.Username,
+                NormalizedUserName = createUserCommand.CreateUserDto.Username.ToLowerInvariant(),
                 SecurityStamp = "someRandomSecurityStamp"
             };
 
@@ -110,7 +113,7 @@ namespace Zenith.Core.Tests.Users
 
             result.IsSuccess.ShouldBeFalse();
             result.Errors.ShouldNotBeEmpty();
-            result.Errors.ShouldContain($"Username {createUserCommand.Username} is already in use");
+            result.Errors.ShouldContain($"Username {createUserCommand.CreateUserDto.Username} is already in use");
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿using Zenith.Core.Domain.Entities;
+﻿using System.Security.Claims;
+using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Users.Dtos;
 
 namespace Zenith.Core.Infrastructure.Identity
 {
     public interface ICurrentUserContext
     {
-        Task<ZenithUser> GetCurrentUserContext();
+        HttpContextUserDto GetCurrentUserContext();
 
         string GetCurrentUserToken();
     }

@@ -8,9 +8,9 @@ using Zenith.Core.Infrastructure.Services;
 
 namespace Zenith.API.Configuration
 {
-    public static class JwtTokenConfiguration
+    public static class JwtAuthenticationConfiguration
     {
-        public static IServiceCollection AddTokenConfiguration(this IServiceCollection services,IConfiguration configuration)
+        public static IServiceCollection AddJWTAuthConfiguration(this IServiceCollection services,IConfiguration configuration)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["JWT:SecretKey"]));
             var validateIssuer = Convert.ToBoolean(configuration["JWT:ValidateIssuer"]);

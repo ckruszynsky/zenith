@@ -21,9 +21,9 @@ namespace Zenith.Core.Infrastructure.Identity
 
         public string CreateToken(ZenithUser user)
         {
-            var tokenKey = Encoding.ASCII.GetBytes(_configuration["JWT_SECRET"]);
-            var issuer = _configuration["ISSUER"];
-            var audience = _configuration["AUDIENCE"];
+            var tokenKey = Encoding.ASCII.GetBytes(_configuration["JWT:SecretKey"]);
+            var issuer = _configuration["JWT:ValidIssuer"];
+            var audience = _configuration["JWT:ValidAudience"];
 
             var securityToken = new JwtSecurityToken(
                 issuer: issuer,
@@ -58,8 +58,8 @@ namespace Zenith.Core.Infrastructure.Identity
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Iss, issuer),
                 new Claim(JwtRegisteredClaimNames.Aud, audience),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("username", user.UserName)
+                new Claim(ClaimTypes.UserData, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),                
             };
         }
     }

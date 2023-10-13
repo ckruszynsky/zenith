@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
+using Zenith.Core.Features.Users.Dtos;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
 
@@ -13,14 +14,14 @@ namespace Zenith.Core.Features.Users
 {
     public class LoginUser
     {
-        public record Command(string Email, string Password) : IRequest<Result<UserViewModel>>;
+        public record Command(LoginUserDto LoginUserDto) : IRequest<Result<UserViewModel>>;
 
         public class Validator : AbstractValidator<LoginUser.Command>
         {
             public Validator()
             {
-                RuleFor(c => c.Email).EmailAddress().NotEmpty();
-                RuleFor(c => c.Password).NotEmpty();
+                RuleFor(c => c.LoginUserDto.Email).EmailAddress().NotEmpty();
+                RuleFor(c => c.LoginUserDto.Password).NotEmpty();
             }
         }
 
@@ -48,13 +49,14 @@ namespace Zenith.Core.Features.Users
 
             public async Task<Result<UserViewModel>> Handle(Command request, CancellationToken cancellationToken)
             {
-                var existingUser = await _userManager.FindByEmailAsync(request.Email.ToUpperInvariant());
+                var loginUserDto = request.LoginUserDto;
+                var existingUser = await _userManager.FindByEmailAsync(loginUserDto.Email.ToUpperInvariant());
                 if (existingUser == null)
                 {
                     return Result.Error($"Incorrect user or password");
                 }
 
-                var existingUserPasswordMatch = await _userManager.CheckPasswordAsync(existingUser, request.Password);
+                var existingUserPasswordMatch = await _userManager.CheckPasswordAsync(existingUser, loginUserDto.Password);
                 if (!existingUserPasswordMatch)
                 {
                     return Result.Error("Incorrect user or password");
