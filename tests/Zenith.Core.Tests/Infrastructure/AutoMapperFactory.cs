@@ -1,9 +1,9 @@
-﻿using AutoMapper;
-using System.Reflection;
+﻿using System.Reflection;
+using AutoMapper;
 using Zenith.Common.Mapping;
 using Zenith.Core.Features.Users;
 
-namespace Zenith.Core.Tests.Factories
+namespace Zenith.Core.Tests.Infrastructure
 {
     public static class AutoMapperFactory
     {

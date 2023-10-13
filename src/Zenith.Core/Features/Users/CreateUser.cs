@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
+using Zenith.Core.Features.Users.Dtos;
 using Zenith.Core.Infrastructure.Identity;
 using Zenith.Core.Infrastructure.Persistence;
 
@@ -14,23 +15,23 @@ namespace Zenith.Core.Features.Users
 {
     public class CreateUser
     {
-        public record Command(string Email, string Username, string Password) : IRequest<Result<UserViewModel>>;
+        public record Command(CreateUserDto CreateUserDto) : IRequest<Result<UserViewModel>>;
         public class Validator : AbstractValidator<Command>
         {
             public Validator()
             {
-                RuleFor(u => u.Email)
+                RuleFor(u => u.CreateUserDto.Email)
                     .NotEmpty()
                     .EmailAddress();
 
-                RuleFor(u => u.Username)
+                RuleFor(u => u.CreateUserDto.Username)
                     .NotEmpty();
 
-                RuleFor(u => u.Password)
+                RuleFor(u => u.CreateUserDto.Password)
                     .NotEmpty();
             }
         }
-        public class Handler : IRequestHandler<Command, Result<UserViewModel>>
+        public class Handler : IRequestHandler<CreateUser.Command, Result<UserViewModel>>
         {
             private readonly UserManager<ZenithUser> _userManager;
             private readonly ILogger<Handler> _logger;
@@ -56,25 +57,25 @@ namespace Zenith.Core.Features.Users
             {
                 Guard.Against.Null(request, nameof(request));
 
-                var existingUserByUserName = await _userManager.FindByNameAsync(request.Username);
+                var existingUserByUserName = await _userManager.FindByNameAsync(request.CreateUserDto.Username);
                 if (existingUserByUserName != null)
                 {
-                    return Result.Error($"Username {request.Username} is already in use");
+                    return Result.Error($"Username {request.CreateUserDto.Username} is already in use");
                 }
 
-                var existingUserByEmail = await _userManager.FindByEmailAsync(request.Email);
+                var existingUserByEmail = await _userManager.FindByEmailAsync(request.CreateUserDto.Email);
                 if (existingUserByEmail != null)
                 {
-                    return Result.Error($"Email {request.Email} is already in use");
+                    return Result.Error($"Email {request.CreateUserDto.Email} is already in use");
                 }
 
                 var newUser = new ZenithUser
                 {
-                    UserName = request.Username,
-                    Email = request.Email,
+                    UserName = request.CreateUserDto.Username,
+                    Email = request.CreateUserDto.Email,
                 };
 
-                var createUserResult = await _userManager.CreateAsync(newUser, request.Password);
+                var createUserResult = await _userManager.CreateAsync(newUser, request.CreateUserDto.Password);
 
                 if (!createUserResult.Succeeded)
                 {

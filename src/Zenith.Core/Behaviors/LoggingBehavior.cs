@@ -1,4 +1,5 @@
-﻿using MediatR.Pipeline;
+﻿using System.Security.Claims;
+using MediatR.Pipeline;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Zenith.Core.Infrastructure.Identity;
@@ -18,15 +19,14 @@ namespace Zenith.Core.Behaviors
             _isEnabled = Convert.ToBoolean(configuration["PipelineSettings:LoggingEnabled"]);
         }
 
-        public async Task Process(TRequest request, CancellationToken cancellationToken)
+        public Task Process(TRequest request, CancellationToken cancellationToken)
         {
-            if(!_isEnabled) return;
+            if(!_isEnabled) return Task.CompletedTask;
             var requestName = typeof(TRequest).Name;
-            var user = await _currentUserContext.GetCurrentUserContext();            
-            var userId = user.Id ?? string.Empty;
-            var userName = user.UserName ?? string.Empty;
+            var user = _currentUserContext.GetCurrentUserContext();                        
             _logger.LogInformation("Request: {Name} {@UserId} {@UserName} {@Request}",
-                requestName, userId, userName, request);
+                requestName, user.Id, user.UserName, request);
+            return Task.CompletedTask;
         }
     }
 }

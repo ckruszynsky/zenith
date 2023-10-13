@@ -33,7 +33,7 @@ namespace Zenith.Core.Behaviors
             if (_isEnabled) 
             { 
                 _timer.Start();
-                    await next();
+                   var response = await next();
                 _timer.Stop();
 
                 var elapsedMilliseconds = _timer.ElapsedMilliseconds;
@@ -45,7 +45,7 @@ namespace Zenith.Core.Behaviors
                         _logger.LogWarning("Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@Request}",
                         requestName, elapsedMilliseconds,request);
                 }
-
+                return response;
             }
 
             return await next();

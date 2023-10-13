@@ -30,12 +30,12 @@ namespace Zenith.Core.Features.Profile
             Guard.Against.NullOrEmpty(username, nameof(username));            
             var userToFollow = await GetUser(username);
 
-            var currentUser = await _currentUserContext.GetCurrentUserContext();
-            if(currentUser.Id == userToFollow.Id)
+            var claimsPrincipal = _currentUserContext.GetCurrentUserContext();
+            if(claimsPrincipal.Id == userToFollow.Id)
             {
                 throw new InvalidOperationException("A user cannot follow themselves");
             }
-
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == claimsPrincipal.Id);
             var existingFollow = userToFollow.Followers
                 .FirstOrDefault(userToFollow => userToFollow.UserFollower == currentUser);
 
@@ -59,12 +59,12 @@ namespace Zenith.Core.Features.Profile
             
             var userToUnfollow = await GetUser(username);
 
-            var currentUser = await _currentUserContext.GetCurrentUserContext();
-            if (currentUser.Id == userToUnfollow.Id)
+            var claimsPrincipal = _currentUserContext.GetCurrentUserContext();
+            if (claimsPrincipal.Id == userToUnfollow.Id)
             {
                 throw new InvalidOperationException("A user cannot unfollow themselves");
             }
-
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == claimsPrincipal.Id);
             var existingFollow = userToUnfollow.Followers
                 .FirstOrDefault(userToFollow => userToFollow.UserFollower == currentUser);
             

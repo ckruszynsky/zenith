@@ -47,7 +47,7 @@ namespace Zenith.Core.Features.Articles
             public async Task<Result<ArticleViewModel>> Handle(Command request, CancellationToken cancellationToken)
             {
                try { 
-                    var currentUser = await _currentUserContext.GetCurrentUserContext();
+                    var currentUser = _currentUserContext.GetCurrentUserContext();
                     var tags = await _serviceManager.Tags.CreateTagsAsync(request.UpdatedArticle.Tags);
                     var articleDto = await _serviceManager.Articles.UpdateArticleAsync(request.Slug, request.UpdatedArticle,tags, currentUser.Id);
                     var articleViewModel = _mapper.Map<ArticleViewModel>(articleDto);

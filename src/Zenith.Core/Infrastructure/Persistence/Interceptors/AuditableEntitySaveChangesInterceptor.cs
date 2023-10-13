@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 using Zenith.Common.Date;
+using Zenith.Core.Domain.Entities;
 using Zenith.Core.Infrastructure.Identity;
 
 namespace Zenith.Core.Infrastructure.Persistence.Interceptors
@@ -12,10 +14,10 @@ namespace Zenith.Core.Infrastructure.Persistence.Interceptors
         private readonly ICurrentUserContext _currentUserService;
         private readonly IDateTime _dateTime;
 
-        public AuditableEntitySaveChangesInterceptor(
+        public AuditableEntitySaveChangesInterceptor(ICurrentUserContext currentUserContext,
            IServiceProvider serviceProvider)
         {
-            _currentUserService = serviceProvider.GetRequiredService<ICurrentUserContext>();
+            _currentUserService = currentUserContext;
             _dateTime = serviceProvider.GetRequiredService<IDateTime>();
         }
 
@@ -35,7 +37,8 @@ namespace Zenith.Core.Infrastructure.Persistence.Interceptors
 
         public void UpdateEntities(DbContext? context)
         {
-            var currentUser = _currentUserService.GetCurrentUserContext();
+            var claimsPrincipal = _currentUserService.GetCurrentUserContext();
+            var currentUser = context?.Find<ZenithUser>(claimsPrincipal.Id);
             if (context == null) return;
 
             foreach (var entry in context.ChangeTracker.Entries())
@@ -43,16 +46,21 @@ namespace Zenith.Core.Infrastructure.Persistence.Interceptors
                 var baseType = entry.Entity.GetType().BaseType;
                 if (baseType != null && baseType.Name == "BaseAuditableEntity")
                 {
-
+                    
                     if (entry.State == EntityState.Added)
                     {
-                        entry.Property("CreatedBy").CurrentValue = currentUser.Id;
+                        if(currentUser != null) { 
+                            entry.Property("CreatedBy").CurrentValue = currentUser.Id;
+                        }
                         entry.Property("Created").CurrentValue = _dateTime.Now;
                     }
 
                     if (entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.HasChangedOwnedEntities())
                     {
-                        entry.Property("LastModifiedBy").CurrentValue = currentUser.Id;
+                        if(currentUser != null)
+                        {
+                            entry.Property("LastModifiedBy").CurrentValue = currentUser.Id;
+                        }                        
                         entry.Property("LastModified").CurrentValue = _dateTime.Now;
                     }
 

@@ -44,7 +44,7 @@ namespace Zenith.Core.Features.Articles
             {
                 try
                 {
-                    var user = await _currentUserContext.GetCurrentUserContext();
+                    var user = _currentUserContext.GetCurrentUserContext();
                     await _serviceManger.Articles.FavoriteArticleAsync(request.Slug, user.Id );
                     await _mediator.Publish(new ActivityLog.AddActivity.Notification(new ActivityLog.Dtos.AddActivityDto
                     {

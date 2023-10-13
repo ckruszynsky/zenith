@@ -46,7 +46,7 @@ namespace Zenith.Core.Features.Articles
             {
                try
                {
-                    var user = await _currentUserContext.GetCurrentUserContext();
+                    var user = _currentUserContext.GetCurrentUserContext();
                     var result = await _serviceManager.Articles.DeleteCommentAsync(request.Slug, request.CommentId, user.Id);
                     await _mediator.Publish(new ActivityLog.AddActivity.Notification(new ActivityLog.Dtos.AddActivityDto
                     {

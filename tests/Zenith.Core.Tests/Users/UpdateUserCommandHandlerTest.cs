@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Users;
+using Zenith.Core.Features.Users.Dtos;
 using Zenith.Core.Tests.Infrastructure;
 
 namespace Zenith.Core.Tests.Users
@@ -21,12 +22,14 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async void GivenValidUserRequest_WhenTheUserExistsAndUpdatesEmail_ReturnsUpdateUserViewModelResponseAndIssueNewToken()
         {
-            var updateUserCommand = new UpdateUser.Command
-            (
-                "aUpdatedEmail@gmail.com",
-                TestConstants.TestUserName,
-                "This is my bio",
-                "A new image"
+            var updateUserCommand = new UpdateUser.Command (
+            
+                new UpdateUserDto {
+                Email = "aUpdatedEmail@gmail.com",
+                Username = TestConstants.TestUserName,
+                Bio = "This is my bio",
+                Image = "A new image"
+                }
             );
 
             var originalUser = await UserManager.FindByEmailAsync(TestConstants.TestUserEmail);
@@ -37,10 +40,10 @@ namespace Zenith.Core.Tests.Users
             result.ShouldNotBeNull();
             result.Value.ShouldNotBeNull();
             result.IsSuccess.ShouldBeTrue();
-            result.Value.Email.ShouldBe(updateUserCommand.Email);
-            result.Value.UserName.ShouldBe(updateUserCommand.Username);
-            result.Value.Bio.ShouldBe(updateUserCommand.Bio);
-            result.Value.Image.ShouldBe(updateUserCommand.Image);
+            result.Value.Email.ShouldBe(updateUserCommand.UpdateUserDto.Email);
+            result.Value.UserName.ShouldBe(updateUserCommand.UpdateUserDto.Username);
+            result.Value.Bio.ShouldBe(updateUserCommand.UpdateUserDto.Bio);
+            result.Value.Image.ShouldBe(updateUserCommand.UpdateUserDto.Image);
 
             result.Value.Token.ShouldNotBe(new CurrentUserContextTest(UserManager).GetCurrentUserToken());
             result.Value.Token.ShouldBe(new TokenServiceTest().CreateToken(originalUser));
@@ -56,11 +59,14 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenValidUserRequest_WhenTheUserExistsAndUpdatesUsername_ReturnsUpdateUserViewModelResponseAndIssuesNewToken()
         {
-            var updateUserCommand = new UpdateUser.Command
-            (
-               Username: "aupdatedUsername",
-               Bio: "my bio",
-               Image: "a new image"
+            var updateUserCommand = new UpdateUser.Command(
+
+                new UpdateUserDto
+                {                    
+                    Username = "updatedUserName",
+                    Bio = "This is my bio",
+                    Image = "A new image"
+                }
             );
 
             var originalUser = await UserManager.FindByEmailAsync(TestConstants.TestUserEmail);
@@ -78,9 +84,9 @@ namespace Zenith.Core.Tests.Users
 
             response.Value.ShouldNotBeNull();
             response.Value.Email.ShouldBe(TestConstants.TestUserEmail);
-            response.Value.UserName.ShouldBe(updateUserCommand.Username);
-            response.Value.Bio.ShouldBe(updateUserCommand.Bio);
-            response.Value.Image.ShouldBe(updateUserCommand.Image);
+            response.Value.UserName.ShouldBe(updateUserCommand.UpdateUserDto.Username);
+            response.Value.Bio.ShouldBe(updateUserCommand.UpdateUserDto.Bio);
+            response.Value.Image.ShouldBe(updateUserCommand.UpdateUserDto.Image);
 
             response.Value.Token.ShouldNotBe(new CurrentUserContextTest(UserManager).GetCurrentUserToken());
             response.Value.Token.ShouldBe(new TokenServiceTest().CreateToken(originalUser));
@@ -90,7 +96,14 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenValidUserRequest_WhenTheUserExistsAndDoesNotUpdateUsernameOrEmail_ReturnsUpdateUserViewModelResponseWithSameToken()
         {
-            var updateUserCommand = new UpdateUser.Command(Bio: "My Bio", Image: "a new image");
+            var updateUserCommand = new UpdateUser.Command(
+
+                new UpdateUserDto
+                {
+                    Bio = "This is my bio",
+                    Image = "A new image"
+                }
+            );
 
             var originalUser = await UserManager.FindByEmailAsync(TestConstants.TestUserEmail);
 
@@ -109,8 +122,8 @@ namespace Zenith.Core.Tests.Users
             response.IsSuccess.ShouldBeTrue();
             response.Value.Email.ShouldBe(TestConstants.TestUserEmail);
             response.Value.UserName.ShouldBe(TestConstants.TestUserName);
-            response.Value.Bio.ShouldBe(updateUserCommand.Bio);
-            response.Value.Image.ShouldBe(updateUserCommand.Image);
+            response.Value.Bio.ShouldBe(updateUserCommand.UpdateUserDto.Bio);
+            response.Value.Image.ShouldBe(updateUserCommand.UpdateUserDto.Image);
 
             response.Value.Token.ShouldBe(new CurrentUserContextTest(UserManager).GetCurrentUserToken());
             response.Value.Token.ShouldNotBe(new TokenServiceTest().CreateToken(originalUser));
@@ -120,14 +133,20 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenValidUserRequest_WhenTheUpdatedUsernameAlreadyExists_ReturnsErrorResponse()
         {
-            var updateUserCommand = new UpdateUser.Command(Username: "existing.user");
+            var updateUserCommand = new UpdateUser.Command(
+
+                new UpdateUserDto
+                {                   
+                    Username = "updatedUserName"                 
+                }
+            );
 
             var existingUserWithSameUsername = new ZenithUser
             {
                 Email = "existingUser@gmail.com",
                 NormalizedEmail = "existingUser@gmail.com".ToUpperInvariant(),
-                UserName = updateUserCommand.Username,
-                NormalizedUserName = updateUserCommand.Username.ToUpperInvariant(),
+                UserName = updateUserCommand.UpdateUserDto.Username,
+                NormalizedUserName = updateUserCommand.UpdateUserDto.Username.ToUpperInvariant(),
                 SecurityStamp = "someRandomSecurityStamp"
             };
 
@@ -147,13 +166,19 @@ namespace Zenith.Core.Tests.Users
             var response = await command.Handle(updateUserCommand, CancellationToken.None);
 
             response.IsSuccess.ShouldBeFalse();
-            response.Errors.ShouldContain($"Username {updateUserCommand.Username} is already in use");
+            response.Errors.ShouldContain($"Username {updateUserCommand.UpdateUserDto.Username} is already in use");
         }
 
         [Fact]
         public async Task GivenValidUserRequest_WhenTheUpdatedEmailAlreadyExists_ReturnsErrorResponse()
         {
-            var updateUserCommand = new UpdateUser.Command(Email: "existingUser@gmail.com");
+            var updateUserCommand = new UpdateUser.Command(
+
+                new UpdateUserDto
+                {
+                    Email = "existingUser@gmail.com",                    
+                }
+            );
 
             var existingUserWithSameUsername = new ZenithUser
             {
@@ -180,13 +205,19 @@ namespace Zenith.Core.Tests.Users
             var response = await command.Handle(updateUserCommand, CancellationToken.None);
 
             response.IsSuccess.ShouldBeFalse();
-            response.Errors.ShouldContain($"Email {updateUserCommand.Email} is already in use");
+            response.Errors.ShouldContain($"Email {updateUserCommand.UpdateUserDto.Email} is already in use");
         }
 
         [Fact]
         public async Task GivenValidUserRequest_WhenRequestContainsNewPassword_ReturnsSuccessResponse()
         {
-            var updateUserCommand = new UpdateUser.Command(Password: "aNewPassword!124#");
+            var updateUserCommand = new UpdateUser.Command(
+
+                new UpdateUserDto
+                {
+                   Password = "newPassword"
+                }
+            );
 
             var originalUser = await UserManager.FindByEmailAsync(TestConstants.TestUserEmail);
 
@@ -207,7 +238,7 @@ namespace Zenith.Core.Tests.Users
             var updatedUser = await UserManager.FindByEmailAsync(TestConstants.TestUserEmail);
             updatedUser.PasswordHash.ShouldNotBeNullOrWhiteSpace();
 
-            var validatedPassword = await UserManager.CheckPasswordAsync(originalUser, updateUserCommand.Password);
+            var validatedPassword = await UserManager.CheckPasswordAsync(originalUser, updateUserCommand.UpdateUserDto.Password);
             var invalidOldPassword = await UserManager.CheckPasswordAsync(originalUser, "#password1!");
 
             validatedPassword.ShouldBeTrue();

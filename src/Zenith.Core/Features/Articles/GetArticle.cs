@@ -40,7 +40,7 @@ namespace Zenith.Core.Features.Articles
                 try { 
                     Guard.Against.NullOrEmpty(request.Slug, nameof(request.Slug));
 
-                    var user = await _currentUserContext.GetCurrentUserContext();
+                    var user = _currentUserContext.GetCurrentUserContext();
                     var articleDto = await _serviceManager.Articles.GetArticleAsync(request.Slug,user.Id);
                 
                     if (articleDto == null)

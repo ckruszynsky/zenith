@@ -46,7 +46,7 @@ namespace Zenith.Core.Features.Articles
             {
                 try
                 {
-                    var currentUser = await _currentUserContext.GetCurrentUserContext();
+                    var currentUser = _currentUserContext.GetCurrentUserContext();
                     await _serviceManager.Articles.DeleteArticleAsync(request.Slug, currentUser.Id);
 
                     await _mediator.Publish(new ActivityLog.AddActivity.Notification(new ActivityLog.Dtos.AddActivityDto

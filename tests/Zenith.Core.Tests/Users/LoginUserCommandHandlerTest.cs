@@ -20,14 +20,20 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenValidRequest_WhenTheUserExists_ReturnsProperUserViewModelResponse()
         {
-            var command = new LoginUser.Command("test.user@gmail.com", "#passwordTest1!");
+            var command = new LoginUser.Command(
+                new Features.Users.Dtos.LoginUserDto
+                {
+                    Email="test.user@gmail.com", 
+                    Password ="#passwordTest1!"
+                }                
+                );
 
             var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
             var response = await handler.Handle(command, CancellationToken.None);
 
             response.IsSuccess.ShouldBeTrue();
             response.Value.ShouldNotBeNull();
-            response.Value.Email.ShouldBe(command.Email);
+            response.Value.Email.ShouldBe(command.LoginUserDto.Email);
             response.Value.UserName.ShouldBe("test.user");
 
             var activityLog = Context.ActivityLogs.FirstOrDefault();
@@ -42,7 +48,13 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenValidUserRequest_WhenTheUserDoesNotExist_ReturnError()
         {
-            var command = new LoginUser.Command("test.user3@gmail.com", "#passwordTest1!");
+            var command = new LoginUser.Command(
+                new Features.Users.Dtos.LoginUserDto
+                {
+                    Email = "test.user3@gmail.com",
+                    Password = "#passwordTest1!"
+                }
+            );
 
             var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
             var response = await handler.Handle(command, CancellationToken.None);
@@ -56,7 +68,13 @@ namespace Zenith.Core.Tests.Users
         [Fact]
         public async Task GivenValidUserRequest_WhenThePasswordDoesNotMatch_ReturnsError()
         {
-            var command = new LoginUser.Command("test.user@gmail.com", "#passwordTest2!");
+            var command = new LoginUser.Command(
+                new Features.Users.Dtos.LoginUserDto
+                {
+                    Email = "test.user@gmail.com",
+                    Password = "#passwordTest2!"
+                }
+            );
 
             var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
             var response = await handler.Handle(command, CancellationToken.None);

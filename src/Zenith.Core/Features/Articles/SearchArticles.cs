@@ -40,7 +40,7 @@ namespace Zenith.Core.Features.Articles
                 
                 try {  
                     Guard.Against.Null(request.SearchParameters, nameof(request.SearchParameters));
-                    var currentUser = await _currentUserContext.GetCurrentUserContext();
+                    var currentUser = _currentUserContext.GetCurrentUserContext();
                     var articleListDto =
                         await _serviceManager.Articles.SearchAsync(request.SearchParameters, currentUser.Id);
 

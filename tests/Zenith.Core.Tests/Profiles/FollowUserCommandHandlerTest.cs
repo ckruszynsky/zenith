@@ -34,7 +34,7 @@ namespace Zenith.Core.Tests.Profiles
             Context.Users.Add(testUser);
             await Context.SaveChangesAsync();
 
-            var currentUser = await CurrentUserContext.GetCurrentUserContext();
+            var currentUser = CurrentUserContext.GetCurrentUserContext();
 
             //act
             var command = new FollowUser.Command(testUser.UserName);
@@ -58,7 +58,7 @@ namespace Zenith.Core.Tests.Profiles
         {
             //arrange
 
-            var currentUser = await CurrentUserContext.GetCurrentUserContext();
+            var currentUser = CurrentUserContext.GetCurrentUserContext();
 
             //act
             var command = new FollowUser.Command("missingUserName");
@@ -76,7 +76,7 @@ namespace Zenith.Core.Tests.Profiles
         {
             //arrange
 
-            var currentUser = await CurrentUserContext.GetCurrentUserContext();
+            var currentUser = CurrentUserContext.GetCurrentUserContext();
 
             //act
             var command = new FollowUser.Command(currentUser.UserName);

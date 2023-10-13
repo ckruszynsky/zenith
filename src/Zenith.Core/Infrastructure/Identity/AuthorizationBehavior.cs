@@ -28,12 +28,13 @@ namespace Zenith.Core.Infrastructure.Identity
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             var authorizeAttributes = request.GetType().GetCustomAttributes<AuthorizeAttribute>();
-            var currentUser = await _currentUserContext.GetCurrentUserContext();
+            var claimsPrincipal = _currentUserContext.GetCurrentUserContext();
+            var currentUser = await _userManager.FindByIdAsync(claimsPrincipal.Id);
             var authorized = false;
             if (authorizeAttributes.Any())
             {
                 //must be authenticated
-                if (currentUser.Id == null)
+                if (claimsPrincipal.Id == null)
                 {
                     throw new UnauthorizedAccessException();
                 }
@@ -41,6 +42,7 @@ namespace Zenith.Core.Infrastructure.Identity
                 var authorizationWithRoles = authorizeAttributes.Where(a => !string.IsNullOrWhiteSpace(a.Roles));
                 if (authorizationWithRoles.Any())
                 {
+                    
                     var claims = await _userManager.GetClaimsAsync(currentUser);
                     foreach (var roles in authorizationWithRoles.Select(a => a.Roles.Split(',')))
                     {
