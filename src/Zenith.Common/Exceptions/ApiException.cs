@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 namespace Zenith.Common.Exceptions
 {
-    namespace Conduit.Core.Exceptions
-    {
         using System;
         using System.Collections.Generic;
         using System.Net;
@@ -18,7 +16,7 @@ namespace Zenith.Common.Exceptions
                 : base(message)
             {
                 StatusCode = statusCode;
-                ApiErrors = new List<ApiError>();              
+                ApiErrors = new List<ApiError>() { new ApiError(message) };                
             }
 
             public ApiException(string message, HttpStatusCode statusCode, ICollection<ApiError> apiErrors)
@@ -35,4 +33,3 @@ namespace Zenith.Common.Exceptions
             public ICollection<ApiError> ApiErrors { get; }            
         }
     }
-}

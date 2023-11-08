@@ -6,7 +6,6 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Zenith.Common.Exceptions;
-using Zenith.Common.Exceptions.Conduit.Core.Exceptions;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Users.Dtos;
