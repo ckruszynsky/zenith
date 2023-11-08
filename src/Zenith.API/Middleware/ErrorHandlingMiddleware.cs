@@ -2,7 +2,6 @@
 using System.Net;
 using FluentValidation;
 using Zenith.Common.Exceptions;
-using Zenith.Common.Exceptions.Conduit.Core.Exceptions;
 using Zenith.Core.Domain.Dtos;
 using Zenith.Core.Domain.ViewModels;
 using Zenith.Core.Infrastructure.Shared;

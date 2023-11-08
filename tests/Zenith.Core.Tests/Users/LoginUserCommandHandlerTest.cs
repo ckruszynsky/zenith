@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
+using Zenith.Common.Exceptions;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Users;
 using Zenith.Core.Tests.Infrastructure;
@@ -55,14 +56,10 @@ namespace Zenith.Core.Tests.Users
                     Password = "#passwordTest1!"
                 }
             );
-
-            var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
-            var response = await handler.Handle(command, CancellationToken.None);
-
-            response.IsSuccess.ShouldBeFalse();
-            response.Errors.ShouldNotBeEmpty();
-            response.Errors.ShouldContain("Incorrect user or password");
-
+            
+                var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
+                handler.Handle(command, CancellationToken.None).ShouldThrow<ApiException>()
+                    .Message.ShouldBe("Incorrect username or password");
         }
 
         [Fact]
@@ -75,13 +72,10 @@ namespace Zenith.Core.Tests.Users
                     Password = "#passwordTest2!"
                 }
             );
-
+           
             var handler = new LoginUser.Handler(UserManager, TokenService, _logger, Mapper, Mediator);
-            var response = await handler.Handle(command, CancellationToken.None);
-
-            response.IsSuccess.ShouldBeFalse();
-            response.Errors.ShouldNotBeEmpty();
-            response.Errors.ShouldContain("Incorrect user or password");
+            handler.Handle(command, CancellationToken.None).ShouldThrow<ApiException>()
+                .Message.ShouldBe("Incorrect username or password");
         }
     }
 }
