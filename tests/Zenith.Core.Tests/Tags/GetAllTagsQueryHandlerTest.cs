@@ -41,10 +41,10 @@ namespace Zenith.Core.Tests.Tags
             // Assert
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.PageNumber.ShouldBe(0);
-            response.PagedInfo.PageSize.ShouldBe(10);
-            response.PagedInfo.TotalPages.ShouldBe(1);
-            response.PagedInfo.TotalRecords.ShouldBe(10);
+            response.Value.PageNumber.ShouldBe(0);
+            response.Value.PageSize.ShouldBe(10);
+            response.Value.TotalPages.ShouldBe(1);
+            response.Value.TotalCount.ShouldBe(10);
         }
 
         [Fact]
@@ -59,10 +59,10 @@ namespace Zenith.Core.Tests.Tags
             // Assert
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.PageNumber.ShouldBe(0);
-            response.PagedInfo.PageSize.ShouldBe(10);
-            response.PagedInfo.TotalPages.ShouldBe(0);
-            response.PagedInfo.TotalRecords.ShouldBe(0);
+            response.Value.PageNumber.ShouldBe(0);
+            response.Value.PageSize.ShouldBe(10);
+            response.Value.TotalPages.ShouldBe(0);
+            response.Value.TotalCount.ShouldBe(0);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Zenith.Core.Features.Tags
             };
             
             var tags = await _appDbContext.Tags
-                .Skip(currentPage * pageSize)
+                .Skip(currentPage-1 * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 

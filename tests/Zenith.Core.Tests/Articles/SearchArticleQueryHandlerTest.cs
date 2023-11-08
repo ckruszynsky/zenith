@@ -72,9 +72,9 @@ namespace Zenith.Core.Tests.Articles
             //assert
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.Any(a=> a.Tags.Contains(tagFilter)).ShouldBe(true);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.Any(a=> a.Tags.Contains(tagFilter)).ShouldBe(true);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
 
@@ -129,9 +129,9 @@ namespace Zenith.Core.Tests.Articles
             //assert
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(authorFilter);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(authorFilter);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -187,10 +187,10 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(authorFilter);
-            response.Value.Any(a => a.Tags.Contains(tagFilter)).ShouldBeTrue();
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(authorFilter);
+            response.Value.Items.Any(a => a.Tags.Contains(tagFilter)).ShouldBeTrue();
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -251,10 +251,10 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(expectedAuthor);
-            response.Value.First().Title.ToLowerInvariant().Contains(searchText.ToLowerInvariant()).ShouldBe(true);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(expectedAuthor);
+            response.Value.Items.First().Title.ToLowerInvariant().Contains(searchText.ToLowerInvariant()).ShouldBe(true);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -323,11 +323,11 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(expectedAuthor);
-            response.Value.First().Title.ToLowerInvariant().Contains(searchText.ToLowerInvariant()).ShouldBe(true);
-            response.Value.First().Tags.Contains(expectedTag).ShouldBeTrue();
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(expectedAuthor);
+            response.Value.Items.First().Title.ToLowerInvariant().Contains(searchText.ToLowerInvariant()).ShouldBe(true);
+            response.Value.Items.First().Tags.Contains(expectedTag).ShouldBeTrue();
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -391,10 +391,10 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(authorFilter);
-            response.Value.Any(a => a.Tags.Contains(tagFilter)).ShouldBeTrue();
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(authorFilter);
+            response.Value.Items.Any(a => a.Tags.Contains(tagFilter)).ShouldBeTrue();
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -463,10 +463,10 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(expectedAuthor);
-            response.Value.First().Title.ShouldBe(articleTestData[0].Title);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(expectedAuthor);
+            response.Value.Items.First().Title.ShouldBe(articleTestData[0].Title);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -542,10 +542,10 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(expectedAuthor);
-            response.Value.First().Title.ShouldBe(articleTestData[0].Title);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(expectedAuthor);
+            response.Value.Items.First().Title.ShouldBe(articleTestData[0].Title);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -621,11 +621,11 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(expectedAuthor);
-            response.Value.First().Title.ShouldBe(articleTestData[0].Title);
-            response.Value.First().Tags.Contains(expectedTag).ShouldBeTrue();
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(expectedAuthor);
+            response.Value.Items.First().Title.ShouldBe(articleTestData[0].Title);
+            response.Value.Items.First().Tags.Contains(expectedTag).ShouldBeTrue();
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -702,11 +702,11 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.First().Author.ShouldBe(expectedAuthor);
-            response.Value.First().Title.ShouldBe(articleTestData[0].Title);
-            response.Value.First().Tags.Contains(expectedTag).ShouldBeTrue();
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.First().Author.ShouldBe(expectedAuthor);
+            response.Value.Items.First().Title.ShouldBe(articleTestData[0].Title);
+            response.Value.Items.First().Tags.Contains(expectedTag).ShouldBeTrue();
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -757,8 +757,8 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -810,8 +810,8 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -862,8 +862,8 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -911,8 +911,8 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -964,8 +964,8 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
 
@@ -1019,8 +1019,8 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
 
@@ -1076,8 +1076,8 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
     }

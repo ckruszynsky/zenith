@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zenith.Common", "src\Zenith
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zenith.Core.Tests", "tests\Zenith.Core.Tests\Zenith.Core.Tests.csproj", "{976206BB-FBC0-47A6-B4DC-B35909AD0612}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zenith.API", "src\Zenith.API\Zenith.API.csproj", "{DD1579DB-B32A-4E95-B874-4A6052C77269}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zenith.API", "src\Zenith.API\Zenith.API.csproj", "{DD1579DB-B32A-4E95-B874-4A6052C77269}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zenith.IntegrationTests", "tests\Zenith.IntegrationTests\Zenith.IntegrationTests.csproj", "{AF1C8F04-2268-4F26-B82A-D2EF1E45D556}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,10 @@ Global
 		{DD1579DB-B32A-4E95-B874-4A6052C77269}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD1579DB-B32A-4E95-B874-4A6052C77269}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD1579DB-B32A-4E95-B874-4A6052C77269}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF1C8F04-2268-4F26-B82A-D2EF1E45D556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF1C8F04-2268-4F26-B82A-D2EF1E45D556}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF1C8F04-2268-4F26-B82A-D2EF1E45D556}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF1C8F04-2268-4F26-B82A-D2EF1E45D556}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{0AD6512C-A840-4D2F-BE1E-518EDFFE5998} = {A037180C-FF8E-4946-B7DA-99793072AAC9}
 		{976206BB-FBC0-47A6-B4DC-B35909AD0612} = {1297ECE1-7744-4647-933B-45F5BCD77B4B}
 		{DD1579DB-B32A-4E95-B874-4A6052C77269} = {A037180C-FF8E-4946-B7DA-99793072AAC9}
+		{AF1C8F04-2268-4F26-B82A-D2EF1E45D556} = {1297ECE1-7744-4647-933B-45F5BCD77B4B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4432BE19-B511-40F1-9EF8-96052F22A6CA}

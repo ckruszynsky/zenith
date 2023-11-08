@@ -22,7 +22,7 @@ namespace Zenith.API.Controllers
         public async Task<ActionResult<UserViewModel>> Register([FromBody] CreateUserDto createUserDto)
         {
             var result = await Mediator.Send(new CreateUser.Command(createUserDto));
-            return result.ToActionResult(this);            
+            return HandleResult(result);
         }
 
         [HttpPost("login")]

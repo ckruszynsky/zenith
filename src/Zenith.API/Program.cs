@@ -1,3 +1,4 @@
+using FluentValidation.AspNetCore;
 using HealthChecks.UI.Client;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -5,7 +6,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Zenith.API.Configuration;
+using Zenith.API.Middleware;
 using Zenith.Core.Domain.Entities;
+using Zenith.Core.Features.Users;
+using Zenith.Core.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,12 +22,11 @@ builder.Services.AddIdentityConfiguration(builder.Configuration);
 builder.Services.AddJWTAuthConfiguration(builder.Configuration);
 builder.Services.AddAutoMapperConfiguration();
 builder.Services.AddMediatRConfiguration();
-
-
-
 builder.Services.AddControllerConfiguration();
 builder.Services.AddSwaggerJWTConfiguration(builder.Configuration);
 builder.Services.AddSerilog();
+
+builder.Services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateUser.Validator>());
 
 builder.Services.AddTransient<UserManager<ZenithUser>>();
 
@@ -69,9 +72,16 @@ app.UseSwaggerUI(options =>
         "/swagger/v1/swagger.json",
         $"Zenith API version {builder.Configuration["API:Version"]}"));
 
+var scope = app.Services.CreateScope();
+var initializer = scope.ServiceProvider.GetRequiredService<AppDbInitializer>();
+
+await initializer.InitialiseAsync(scope.ServiceProvider.GetRequiredService<AppDbContext>());
+
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

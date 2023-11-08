@@ -97,7 +97,7 @@ namespace Zenith.Core.Features.Articles
             var totalRecords = query.Count();
 
             var articleEntities = query
-                .Skip(searchParameters.CurrentPage * searchParameters.PageSize)
+                .Skip(searchParameters.CurrentPage-1 * searchParameters.PageSize)
                 .Take(searchParameters.PageSize)
                 .ToList();
 

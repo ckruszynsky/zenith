@@ -32,8 +32,12 @@ namespace Zenith.API
                    UserName = currentHttpContext.User.FindFirstValue(ClaimTypes.UserData) ?? string.Empty,
                };
             }
-            _logger.LogError("User was not found on the current context");
-            throw new NotFoundException("User was not found");
+            
+            return new HttpContextUserDto
+            {
+                Id = string.Empty,
+                UserName = string.Empty
+            };
 
         }
 
