@@ -30,7 +30,7 @@ namespace Zenith.IntegrationTests
         {           
             var response = await client.PostAsync("/api/users/login", GetRequestContent(user));
             var responseContent = await GetResponseContent<UserViewModel>(response);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", responseContent.Token);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseContent.Token);
             GetRequestContent(null);
         }
 

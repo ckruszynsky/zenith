@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
+using Zenith.Common.Exceptions;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Users;
 using Zenith.Core.Features.Users.Dtos;
@@ -163,10 +164,9 @@ namespace Zenith.Core.Tests.Users
                 Context,
                 TokenService, Mediator);
 
-            var response = await command.Handle(updateUserCommand, CancellationToken.None);
-
-            response.IsSuccess.ShouldBeFalse();
-            response.Errors.ShouldContain($"Username {updateUserCommand.UpdateUserDto.Username} is already in use");
+            command.Handle(updateUserCommand, CancellationToken.None)
+                .ShouldThrow<ApiException>()
+                .Message.ShouldBe($"Username {updateUserCommand.UpdateUserDto.Username} is already in use");            
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace Zenith.Core.Tests.Users
             };
 
             existingUserWithSameUsername.PasswordHash = new PasswordHasher<ZenithUser>()
-        .HashPassword(existingUserWithSameUsername, "password");
+                .HashPassword(existingUserWithSameUsername, "password");
 
             await UserManager.CreateAsync(existingUserWithSameUsername);
 
@@ -202,10 +202,11 @@ namespace Zenith.Core.Tests.Users
                 Context,
                 TokenService, Mediator);
 
-            var response = await command.Handle(updateUserCommand, CancellationToken.None);
+             command.Handle(updateUserCommand, CancellationToken.None)
+                .ShouldThrow<ApiException>()
+                .Message.ShouldBe($"Email {updateUserCommand.UpdateUserDto.Email} is already in use");
 
-            response.IsSuccess.ShouldBeFalse();
-            response.Errors.ShouldContain($"Email {updateUserCommand.UpdateUserDto.Email} is already in use");
+           
         }
 
         [Fact]
