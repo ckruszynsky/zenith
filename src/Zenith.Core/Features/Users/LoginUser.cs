@@ -1,9 +1,12 @@
-﻿using Ardalis.Result;
+﻿using System.Net;
+using Ardalis.Result;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Zenith.Common.Exceptions;
+using Zenith.Common.Exceptions.Conduit.Core.Exceptions;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Users.Dtos;
@@ -53,13 +56,13 @@ namespace Zenith.Core.Features.Users
                 var existingUser = await _userManager.FindByEmailAsync(loginUserDto.Email.ToUpperInvariant());
                 if (existingUser == null)
                 {
-                    return Result.Error($"Incorrect user or password");
+                   throw new ApiException($"Incorrect username or password",HttpStatusCode.BadRequest);
                 }
 
                 var existingUserPasswordMatch = await _userManager.CheckPasswordAsync(existingUser, loginUserDto.Password);
                 if (!existingUserPasswordMatch)
                 {
-                    return Result.Error("Incorrect user or password");
+                    throw new ApiException($"Incorrect username or password",HttpStatusCode.BadRequest);
                 }
 
                 var token = _tokenService.CreateToken(existingUser);
