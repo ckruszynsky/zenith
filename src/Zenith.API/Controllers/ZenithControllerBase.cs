@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using Zenith.Common.Exceptions.Conduit.Core.Exceptions;
+using Zenith.Common.Exceptions;
 
 namespace Zenith.API.Controllers
 {

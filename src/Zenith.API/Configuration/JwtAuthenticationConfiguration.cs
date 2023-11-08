@@ -55,7 +55,7 @@ namespace Zenith.API.Configuration
                         OnMessageReceived = context =>
                         {
                             var token = context.HttpContext.Request.Headers["Authorization"];
-                            if (token.Count > 0 && token[0].StartsWith("Token ", StringComparison.OrdinalIgnoreCase))
+                            if (token.Count > 0 && token[0].StartsWith("Bearer", StringComparison.OrdinalIgnoreCase))
                             {
                                 context.Token = token[0].Split(" ")[1];
                             }

@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Net;
+using System.Security.Claims;
 using Ardalis.Result;
 using AutoMapper;
 using FluentValidation;
@@ -6,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Zenith.Common.Exceptions;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Users.Dtos;
@@ -58,12 +60,13 @@ namespace Zenith.Core.Features.Users
                 var claimsPrincipal = _currentUserContext.GetCurrentUserContext();
                 var currentUser = _appDbContext.Users.Single(u => u.UserName == claimsPrincipal.UserName);
                 var updateUserDto = request.UpdateUserDto;
+
                 if (IsRequestPropertyAvailableForUpdate(updateUserDto.Email, currentUser.Email))
                 {
                     var priorExistingEmail = await _userManager.FindByEmailAsync(updateUserDto.Email);
                     if (priorExistingEmail != null)
                     {
-                        return Result.Error($"Email {updateUserDto.Email} is already in use");
+                        throw new ApiException($"Email {updateUserDto.Email} is already in use", HttpStatusCode.BadRequest);                            
                     }
 
                     issueNewToken = true; //flip flag for the new email
@@ -74,7 +77,7 @@ namespace Zenith.Core.Features.Users
                     var priorExistingUsername = await _userManager.FindByNameAsync(updateUserDto.Username);
                     if (priorExistingUsername != null)
                     {
-                        return Result.Error($"Username {updateUserDto.Username} is already in use");
+                       throw new ApiException($"Username {updateUserDto.Username} is already in use", HttpStatusCode.BadRequest);
                     }
                     // Flip the issue token flag for the new username
                     issueNewToken = true;
