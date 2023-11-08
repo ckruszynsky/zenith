@@ -17,6 +17,7 @@ namespace Zenith.API.Configuration
                     builder => builder.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
             });
 
+            services.AddScoped<AppDbInitializer>();
             
 
             return services;

@@ -9,6 +9,7 @@ using Ardalis.Result;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Zenith.Common.Responses;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Articles.Models;
 using Zenith.Core.Infrastructure.Identity;
@@ -18,10 +19,10 @@ namespace Zenith.Core.Features.Articles
 {
     public class SearchArticles
     {
-        public record Query(ArticleSearchDto SearchParameters) : IRequest<PagedResult<IEnumerable<ArticleFeedViewModel>>>;
+        public record Query(ArticleSearchDto SearchParameters) : IRequest<Result<PaginatedList<ArticleFeedViewModel>>>;
 
 
-        public class Handler : IRequestHandler<Query, PagedResult<IEnumerable<ArticleFeedViewModel>>>
+        public class Handler : IRequestHandler<Query, Result<PaginatedList<ArticleFeedViewModel>>>
         {
             private readonly IServiceManager _serviceManager;
             private readonly IMapper _mapper;
@@ -35,27 +36,26 @@ namespace Zenith.Core.Features.Articles
                 _logger = logger;
                 _currentUserContext = currentUserContext;
             }
-            public async Task<PagedResult<IEnumerable<ArticleFeedViewModel>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<PaginatedList<ArticleFeedViewModel>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 
                 try {  
                     Guard.Against.Null(request.SearchParameters, nameof(request.SearchParameters));
                     var currentUser = _currentUserContext.GetCurrentUserContext();
                     var articleListDto =
-                        await _serviceManager.Articles.SearchAsync(request.SearchParameters, currentUser.Id);
-
-                    var pageCount = (int)Math.Ceiling((double)articleListDto.TotalCount / request.SearchParameters.PageSize);
-                    var pagedInfo = new PagedInfo(request.SearchParameters.CurrentPage, request.SearchParameters.PageSize, pageCount,
-                        articleListDto.TotalCount);
+                        await _serviceManager.Articles.SearchAsync(request.SearchParameters, currentUser.Id);              
 
                     var articleFeedItems = _mapper.Map<IEnumerable<ArticleFeedViewModel>>(articleListDto.Articles);
+                    var paginatedList = articleFeedItems.ToPagedList(articleListDto.TotalCount,
+                            request.SearchParameters.CurrentPage,
+                            request.SearchParameters.PageSize);                                               
 
-                    return Result.Success(articleFeedItems).ToPagedResult(pagedInfo);
+                    return Result.Success(paginatedList);
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, "Error occurred searching for article");
-                    return (PagedResult<IEnumerable<ArticleFeedViewModel>>) Result<IEnumerable<ArticleFeedViewModel>>.Error(e.Message);
+                    return Result.Error(e.Message);
                 }
             }
         }

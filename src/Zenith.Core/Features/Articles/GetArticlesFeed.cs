@@ -4,6 +4,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Zenith.Common.Mapping;
+using Zenith.Common.Responses;
 using Zenith.Core.Domain.Entities;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Articles.Models;
@@ -14,9 +15,9 @@ namespace Zenith.Core.Features.Articles
 {
     public class GetArticlesFeed
     {
-        public record Query(ArticleFeedDto FeedParameters): IRequest<PagedResult<IEnumerable<ArticleFeedViewModel>>>;
+        public record Query(ArticleFeedDto FeedParameters): IRequest<Result<PaginatedList<ArticleFeedViewModel>>>;
 
-        public class Handler : IRequestHandler<Query, PagedResult<IEnumerable<ArticleFeedViewModel>>>
+        public class Handler : IRequestHandler<Query, Result<PaginatedList<ArticleFeedViewModel>>>
         {
             private readonly IServiceManager _serviceManager;
             private readonly IMapper _mapper;
@@ -31,7 +32,7 @@ namespace Zenith.Core.Features.Articles
                 _currentUserContext = currentUserContext;
             }
 
-            public async Task<PagedResult<IEnumerable<ArticleFeedViewModel>>> Handle(Query request,
+            public async Task<Result<PaginatedList<ArticleFeedViewModel>>> Handle(Query request,
                 CancellationToken cancellationToken)
             {
                 try { 
@@ -41,18 +42,19 @@ namespace Zenith.Core.Features.Articles
                     var articleListDto =
                         await _serviceManager.Articles.GetArticleFeedAsync(request.FeedParameters, user.Id);
 
-                    var pageCount = (int)Math.Ceiling((double)articleListDto.TotalCount / request.FeedParameters.PageSize);
-                    var pagedInfo = new PagedInfo(request.FeedParameters.PageNumber, request.FeedParameters.PageSize, pageCount,
-                        articleListDto.TotalCount);
+                   var articleFeedItems = _mapper.Map<IEnumerable<ArticleFeedViewModel>>(articleListDto.Articles);
 
-                    var articleFeedItems = _mapper.Map<IEnumerable<ArticleFeedViewModel>>(articleListDto.Articles);
 
-                    return Result.Success(articleFeedItems).ToPagedResult(pagedInfo);
+                    var paginatedArticleFeedItems = articleFeedItems.ToPagedList(articleListDto.TotalCount,
+                        request.FeedParameters.PageNumber,
+                        request.FeedParameters.PageSize);
+
+                    return Result.Success(paginatedArticleFeedItems);
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e,"Error occurred retrieving article feed");
-                    return (PagedResult<IEnumerable<ArticleFeedViewModel>>) Result<IEnumerable<ArticleFeedViewModel>>.Error(e.Message);
+                    return Result.Error(e.Message);
                 }
             }
         }

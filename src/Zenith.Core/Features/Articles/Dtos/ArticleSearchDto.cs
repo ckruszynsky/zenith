@@ -12,7 +12,7 @@ namespace Zenith.Core.Features.Articles.Dtos
         public string? Author { get; set; } = null;
         public bool? IncludeOnlyFavorites { get; set; } = false;
         public string? SearchText { get; set; } = null;
-        public int CurrentPage { get; set; } = 0;
+        public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }
 }

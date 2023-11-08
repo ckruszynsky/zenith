@@ -8,11 +8,13 @@ namespace Zenith.Common.Responses
         public int PageNumber { get; }
         public int TotalPages { get; }
         public int TotalCount { get; }
+        public int PageSize { get; set; }
 
         public PaginatedList(List<T> items, int count, int pageNumber, int pageSize)
         {
             PageNumber = pageNumber;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            PageSize = pageSize;
             TotalCount = count;
             Items = items;
         }
@@ -27,6 +29,6 @@ namespace Zenith.Common.Responses
             var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
             return new PaginatedList<T>(items, count, pageNumber, pageSize);
-        }
+        }        
     }
 }

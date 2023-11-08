@@ -84,14 +84,14 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.PageNumber.ShouldBe(pageNumber);
-            response.PagedInfo.PageSize.ShouldBe(pageSize);
-            response.PagedInfo.TotalPages.ShouldBe(expectedPageCount);
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.Any(v => v.Tags.Contains(expectedTagName)).ShouldBe(true);
-            response.Value.All(v=> v.Following).ShouldBeFalse();
-            response.Value.All(v => v.Favorited).ShouldBeFalse();
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.PageNumber.ShouldBe(pageNumber);
+            response.Value.PageSize.ShouldBe(pageSize);
+            response.Value.TotalPages.ShouldBe(expectedPageCount);
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.Any(v => v.Tags.Contains(expectedTagName)).ShouldBe(true);
+            response.Value.Items.All(v=> v.Following).ShouldBeFalse();
+            response.Value.Items.All(v => v.Favorited).ShouldBeFalse();
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -162,14 +162,14 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.PageNumber.ShouldBe(pageNumber);
-            response.PagedInfo.PageSize.ShouldBe(pageSize);
-            response.PagedInfo.TotalPages.ShouldBe(expectedPageCount);
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.Any(v => v.Tags.Contains(expectedTagName)).ShouldBe(true);
-            response.Value.Any(v => v.Following).ShouldBe(true);
-            response.Value.All(v => v.Favorited).ShouldBeFalse();
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.PageNumber.ShouldBe(pageNumber);
+            response.Value.PageSize.ShouldBe(pageSize);
+            response.Value.TotalPages.ShouldBe(expectedPageCount);
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.Any(v => v.Tags.Contains(expectedTagName)).ShouldBe(true);
+            response.Value.Items.Any(v => v.Following).ShouldBe(true);
+            response.Value.Items.All(v => v.Favorited).ShouldBeFalse();
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
 
         [Fact]
@@ -240,14 +240,14 @@ namespace Zenith.Core.Tests.Articles
 
             response.ShouldNotBeNull();
             response.IsSuccess.ShouldBeTrue();
-            response.PagedInfo.PageNumber.ShouldBe(pageNumber);
-            response.PagedInfo.PageSize.ShouldBe(pageSize);
-            response.PagedInfo.TotalPages.ShouldBe(expectedPageCount);
-            response.PagedInfo.TotalRecords.ShouldBe(expectedTotalCount);
-            response.Value.Any(v => v.Tags.Contains(expectedTagName)).ShouldBe(true);
-            response.Value.All(v => v.Following).ShouldBeFalse();
-            response.Value.Any(v => v.Favorited).ShouldBe(true);
-            response.Value.ShouldBeOfType<List<ArticleFeedViewModel>>();
+            response.Value.PageNumber.ShouldBe(pageNumber);
+            response.Value.PageSize.ShouldBe(pageSize);
+            response.Value.TotalPages.ShouldBe(expectedPageCount);
+            response.Value.TotalCount.ShouldBe(expectedTotalCount);
+            response.Value.Items.Any(v => v.Tags.Contains(expectedTagName)).ShouldBe(true);
+            response.Value.Items.All(v => v.Following).ShouldBeFalse();
+            response.Value.Items.Any(v => v.Favorited).ShouldBe(true);
+            response.Value.Items.ShouldBeOfType<List<ArticleFeedViewModel>>();
         }
     }
 }

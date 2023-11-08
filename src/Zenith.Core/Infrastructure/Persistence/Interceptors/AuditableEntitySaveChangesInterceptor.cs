@@ -38,7 +38,12 @@ namespace Zenith.Core.Infrastructure.Persistence.Interceptors
         public void UpdateEntities(DbContext? context)
         {
             var claimsPrincipal = _currentUserService.GetCurrentUserContext();
-            var currentUser = context?.Find<ZenithUser>(claimsPrincipal.Id);
+            ZenithUser? currentUser = null;
+            if (!string.IsNullOrEmpty(claimsPrincipal.Id))
+            {
+              currentUser = context?.Find<ZenithUser>(claimsPrincipal.Id);
+            }
+            
             if (context == null) return;
 
             foreach (var entry in context.ChangeTracker.Entries())

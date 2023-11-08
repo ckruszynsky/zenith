@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zenith.Common.Responses;
 using Zenith.Core.Features.Articles.Dtos;
 using Zenith.Core.Features.Tags.Dtos;
 using Zenith.Core.Features.Tags.ViewModels;
@@ -16,9 +17,9 @@ namespace Zenith.Core.Features.Tags
 {
     public class GetAllTags
     {
-        public record Query(int PageSize, int CurrentPage):IRequest<PagedResult<IEnumerable<TagViewModel>>>;
+        public record Query(int PageSize = 10, int CurrentPage= 1):IRequest<Result<PaginatedList<TagViewModel>>>;
 
-        public class Handler : IRequestHandler<Query, PagedResult<IEnumerable<TagViewModel>>>
+        public class Handler : IRequestHandler<Query, Result<PaginatedList<TagViewModel>>>
         {
             private readonly IMapper _mapper;
             private readonly IServiceManager _serviceManager;
@@ -30,16 +31,15 @@ namespace Zenith.Core.Features.Tags
                 _serviceManager = serviceManager;
                 _logger = logger;
             }
-            public async Task<PagedResult<IEnumerable<TagViewModel>>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<PaginatedList<TagViewModel>>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var tagListDto = await _serviceManager.Tags.GetAllTagsAsync(request.CurrentPage,request.PageSize);                
-                var pageCount = (int)Math.Ceiling((double)tagListDto.TotalCount / request.PageSize);
-                var pagedInfo = new PagedInfo(request.CurrentPage, request.PageSize, pageCount,
-                    tagListDto.TotalCount);
-
+               
                 var tagViewModels = _mapper.Map<IEnumerable<TagViewModel>>(tagListDto.Tags);
+                var paginatedList = tagViewModels.ToPagedList(tagListDto.TotalCount,request.CurrentPage,
+                                       request.PageSize);
 
-                return Result<IEnumerable<TagViewModel>>.Success(tagViewModels).ToPagedResult(pagedInfo);
+                return Result.Success(paginatedList);
             }
         }
     }

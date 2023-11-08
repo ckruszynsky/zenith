@@ -1,10 +1,36 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Zenith.Core.Domain.Entities;
 
 namespace Zenith.Core.Infrastructure.Persistence
 {
     public class AppDbInitializer
     {
+        private readonly ILogger<AppDbInitializer> _logger;        
+
+        public AppDbInitializer(ILogger<AppDbInitializer> logger)
+        {
+            _logger = logger;            
+        }
+
+        public async Task InitialiseAsync(AppDbContext context)
+        {
+            try
+            {
+                if (context.Database.IsRelational())
+                {
+                    await context.Database.MigrateAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while initialising the database.");
+                throw;
+            }
+        }
+
+
         public static void Initialize(AppDbContext context)
         {
             SeedEntities(context);
@@ -50,9 +76,16 @@ namespace Zenith.Core.Infrastructure.Persistence
             testUser2.PasswordHash = new PasswordHasher<ZenithUser>()
                 .HashPassword(testUser2, "#passwordTest2!");
 
+            var testUser1Exists = context.Users.Any(usr => string.Equals(usr.UserName, testUser1.UserName, StringComparison.OrdinalIgnoreCase));
+            var testUser2Exists = context.Users.Any(u => string.Equals(u.UserName, testUser2.UserName, StringComparison.OrdinalIgnoreCase));
+            if (!testUser1Exists)
+            {
+                context.Users.Add(testUser1);
+            }
+            if (!testUser2Exists) {             
+                context.Users.Add(testUser2);
+            }
 
-            context.Users.Add(testUser1);
-            context.Users.Add(testUser2);
             userId = testUser1.Id;
             testUserId = testUser2.Id;
 
