@@ -112,7 +112,6 @@ namespace Zenith.IntegrationTests.Users
             responseContent.Errors.ShouldNotBeNull();
         }
 
-
         [Test]
         public async Task GivenAUserCreateRequest_WhenRequestIsMissingProperties_ReturnsErrorResponse()
         {
