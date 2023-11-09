@@ -40,16 +40,27 @@ namespace Zenith.Core.Features.Articles
 
 
             var count = await items.CountAsync();
-                
-             var articleEntities  = await items
-                .Skip(feedParameters.PageNumber * feedParameters.PageSize)
-                .Take(feedParameters.PageSize)
-                .ToListAsync();
+
+            List<Article> articleEntities;
+            if(count < feedParameters.PageSize)
+            {
+                articleEntities = await items.ToListAsync();
+            }
+            else
+            {
+                articleEntities = await items
+                    .Skip(feedParameters.PageNumber - 1 * feedParameters.PageSize)
+                    .Take(feedParameters.PageSize)
+                    .ToListAsync();
+            }
 
             var user = GetArticleUserQueryable(userId);
 
             var articleDtos = _mapper.Map<IEnumerable<ArticleDto>>(articleEntities);
-            articleDtos.UpdateArticleFollowing(user, articleEntities);            
+            if (articleDtos != null) { 
+                articleDtos.UpdateArticleFollowing(user, articleEntities);            
+            }
+
             return new ArticleListDto
             {
                 Articles = articleDtos ?? new List<ArticleDto>(),
